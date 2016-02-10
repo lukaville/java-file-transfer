@@ -20,7 +20,7 @@ public class ConnectDialog extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonConnect);
 
-        buttonConnect.addActionListener(e -> onOK());
+        buttonConnect.addActionListener(e -> onConnect());
 
         buttonCancel.addActionListener(e -> onCancel());
 
@@ -43,7 +43,8 @@ public class ConnectDialog extends JDialog {
         }
     }
 
-    private void onOK() {
+    private void onConnect() {
+
         dispose();
     }
 
