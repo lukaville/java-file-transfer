@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/java,intellij,osx,linux
 
 ### Java ###
@@ -106,3 +105,5 @@ Temporary Items
 
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
+
+!libraries/*
