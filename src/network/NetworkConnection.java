@@ -7,8 +7,8 @@ import java.io.OutputStream;
 /**
  * Created by nickolay on 10.02.16.
  */
-public interface NetworkConnection {
-    OutputStream getOutputStream() throws IOException;
-    InputStream getInputStream() throws IOException;
-    void close();
+public abstract class NetworkConnection {
+    public abstract OutputStream getOutputStream() throws IOException;
+    public abstract InputStream getInputStream() throws IOException;
+    public abstract void close();
 }

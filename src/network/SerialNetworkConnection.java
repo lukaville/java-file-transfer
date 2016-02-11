@@ -9,7 +9,7 @@ import java.io.OutputStream;
 /**
  * Created by nickolay on 10.02.16.
  */
-public class SerialNetworkConnection implements NetworkConnection {
+public class SerialNetworkConnection extends NetworkConnection {
     public static final String APP_NAME = "FileTransfer";
     private SerialPort port;
 
