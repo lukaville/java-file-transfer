@@ -1,10 +1,10 @@
 package ui;
 
+import client.model.FileItem;
 import network.ConnectListener;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
 
 
 /**
@@ -13,33 +13,39 @@ import java.awt.event.ActionListener;
 public class MainForm {
     private static final String WINDOW_TITLE = "File transfer";
 
+    private Icon fileIcon = new ImageIcon("file.png");
+    private Icon folderIcon = new ImageIcon("folder.png");
+
     private JButton connectButton;
     private JButton disconnectButton;
-    private JList fileList;
+    private JList<FileItem> fileList;
     private JPanel panel;
-    private final ConnectListener connectListener;
-    private final MainFormListener mainFormListener;
+    private final UiListener uiListener;
 
-    public interface MainFormListener {
-        void onDisconnectButton();
-    }
+    private final DefaultListModel<FileItem> fileListModel;
 
-    public MainForm(ConnectListener connectListener, MainFormListener mainFormListener) {
-        this.connectListener = connectListener;
-        this.mainFormListener = mainFormListener;
+    public MainForm(UiListener uiListener) {
+        this.uiListener = uiListener;
+
+        fileList.setCellRenderer(new IconListRenderer(item -> {
+            if (((FileItem) item).isDirectory()) {
+                return folderIcon;
+            } else {
+                return fileIcon;
+            }
+        }));
+
+        fileListModel = new DefaultListModel<>();
+        fileList.setModel(fileListModel);
 
         connectButton.addActionListener(e -> openConnectDialog());
-        disconnectButton.addActionListener(e -> mainFormListener.onDisconnectButton());
+        disconnectButton.addActionListener(e -> uiListener.onDisconnectButton());
     }
 
     private void openConnectDialog() {
-        ConnectDialog dialog = new ConnectDialog(connectListener);
+        ConnectDialog dialog = new ConnectDialog(uiListener);
         dialog.pack();
         dialog.setVisible(true);
-    }
-
-    public JPanel getPanel() {
-        return panel;
     }
 
     public void show() {
@@ -50,5 +56,10 @@ public class MainForm {
         frame.setSize(400, 400);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    public void updateFileList(List<FileItem> files) {
+        fileListModel.removeAllElements();
+        files.forEach(fileListModel::addElement);
     }
 }

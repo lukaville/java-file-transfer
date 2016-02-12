@@ -1,16 +1,12 @@
 package ui;
 
 import gnu.io.SerialPort;
-import network.ConnectListener;
-import network.NetworkConnection;
-import network.TcpNetworkConnection;
 import util.SerialUtils;
 
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
 public class ConnectDialog extends JDialog {
     public static final String PARITY_NONE = "отсутствует";
@@ -31,9 +27,9 @@ public class ConnectDialog extends JDialog {
     private JComboBox<String> stopBits;
     private JComboBox<String> parity;
     private JComboBox<String> comPort;
-    private ConnectListener listener;
+    private UiListener uiListener;
 
-    public ConnectDialog(ConnectListener listener) {
+    public ConnectDialog(UiListener uiListener) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonConnect);
@@ -56,7 +52,7 @@ public class ConnectDialog extends JDialog {
         setStopBits();
         setParity();
 
-        this.listener = listener;
+        this.uiListener = uiListener;
     }
 
     private void updateComPortList() {
@@ -104,31 +100,12 @@ public class ConnectDialog extends JDialog {
     }
 
     private void onConnect() {
-        // TODO: serial connection
-        startTcpConnection(false);
+        uiListener.onConnectButton(null, 1, 0, 0, 0);
         dispose();
     }
 
     private void onCancel() {
-        // TODO: serial connection
-        startTcpConnection(true);
+        uiListener.onConnectButton(null, 0, 0, 0, 0);
         dispose();
-    }
-
-    private void startTcpConnection(boolean isServer) {
-        try {
-            NetworkConnection connection;
-            if (isServer) {
-                connection = new TcpNetworkConnection(3333);
-            } else {
-                connection = new TcpNetworkConnection("127.0.0.1", 3333);
-            }
-
-            if (listener != null) {
-                listener.onConnect(connection);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

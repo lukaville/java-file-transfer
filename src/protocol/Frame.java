@@ -7,7 +7,7 @@ public class Frame {
     public static final byte START_BYTE = (byte) 0xFF;
     public static final byte STOP_BYTE = START_BYTE;
 
-    public static final byte TYPE_INIT = (byte) 0x00;
+    public static final byte TYPE_CONNECT = (byte) 0x00;
     public static final byte TYPE_SET_SPEED = (byte) 0x01;
     public static final byte TYPE_GET_LIST_DIRECTORY = (byte) 0x02;
     public static final byte TYPE_LIST_DIRECTORY = (byte) 0x03;
@@ -16,11 +16,11 @@ public class Frame {
     public static final byte TYPE_FILE_DATA = (byte) 0x06;
     public static final byte TYPE_FILE_DATA_SUCCESS = (byte) 0x07;
     public static final byte TYPE_FILE_DATA_RETRY= (byte) 0x08;
-    public static final byte TYPE_FILE_DATA_CANCE = (byte) 0x09;
+    public static final byte TYPE_FILE_DATA_CANCEL = (byte) 0x09;
     public static final byte TYPE_GET_FILE_END = (byte) 0x10;
-    public static final byte TYPE_CLOSE = (byte) 0x11;
+    public static final byte TYPE_DISCONNECT = (byte) 0x11;
 
-    private byte type = TYPE_INIT;
+    private byte type = TYPE_CONNECT;
     private byte[] data;
 
     public Frame(byte type) {

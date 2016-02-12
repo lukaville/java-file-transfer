@@ -8,7 +8,7 @@ import java.io.InputStream;
 /**
  * Created by nickolay on 11.02.16.
  */
-public class FileTransferClient extends Thread {
+public class FileTransferConnection extends Thread {
     public static final int NONE = -1;
     public static final int BYTE_START_INDEX = 0;
     public static final int BYTE_TYPE_INDEX = 1;
@@ -25,11 +25,8 @@ public class FileTransferClient extends Thread {
 
     private NetworkConnection connection;
 
-    public FileTransferClient(NetworkConnection connection) {
+    public FileTransferConnection(NetworkConnection connection, FrameListener listener) {
         this.connection = connection;
-    }
-
-    public void setListener(FrameListener listener) {
         this.listener = listener;
     }
 
@@ -104,12 +101,16 @@ public class FileTransferClient extends Thread {
         }
 
         if (listener != null) {
-            listener.onFrameReceived(frame, this);
+            listener.onFrameReceived(frame);
         }
     }
 
-    public void sendFrame(Frame frame) throws IOException {
-        connection.getOutputStream().write(frame.build());
+    public void sendFrame(Frame frame) {
+        try {
+            connection.getOutputStream().write(frame.build());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void disconnect() {

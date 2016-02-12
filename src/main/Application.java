@@ -1,24 +1,26 @@
 package main;
 
-import network.ConnectListener;
-import protocol.FileTransferClient;
+import client.FileTransferClient;
+import client.FileTransferClientListener;
+import client.model.FileItem;
+import gnu.io.CommPortIdentifier;
 import network.NetworkConnection;
-import protocol.Frame;
-import protocol.FrameListener;
+import network.TcpNetworkConnection;
 import ui.MainForm;
+import ui.UiListener;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Created by nickolay on 10.02.16.
  */
-public class Application implements ConnectListener, FrameListener, MainForm.MainFormListener {
+public class Application implements UiListener, FileTransferClientListener {
     private final MainForm mainForm;
     private FileTransferClient client;
 
     public Application() {
-        mainForm = new MainForm(this, this);
+        mainForm = new MainForm(this);
     }
 
     public void start() {
@@ -26,27 +28,36 @@ public class Application implements ConnectListener, FrameListener, MainForm.Mai
     }
 
     @Override
-    public void onConnect(NetworkConnection connection) {
-        if (client != null) {
-            client.disconnect();
-        }
-        client = new FileTransferClient(connection);
-        client.setListener(this);
-        client.start();
-    }
-
-    @Override
-    public void onFrameReceived(Frame frame, FileTransferClient client) {
-        System.out.println("Frame received: " + new String(frame.getData(), StandardCharsets.UTF_8));
-    }
-
-    @Override
     public void onDisconnectButton() {
-        String data = "hello";
+        client.requestList(".");
+    }
+
+    @Override
+    public void onList(List<FileItem> files) {
+        mainForm.updateFileList(files);
+    }
+
+    @Override
+    public void onConnectButton(CommPortIdentifier port, int baudRate, int dataBits, int stopBits, int parity) {
+        // TODO: serial port
+        NetworkConnection connection = connect(baudRate == 0);
+        client = new FileTransferClient(connection);
+    }
+
+    private NetworkConnection connect(boolean isServer) {
         try {
-            client.sendFrame(new Frame(Frame.TYPE_FILE_DATA, data.getBytes(StandardCharsets.UTF_8)));
+            NetworkConnection connection;
+            if (isServer) {
+                connection = new TcpNetworkConnection(3333);
+            } else {
+                connection = new TcpNetworkConnection("127.0.0.1", 3333);
+            }
+
+            return connection;
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return null;
     }
 }
