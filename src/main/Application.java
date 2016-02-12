@@ -1,7 +1,6 @@
 package main;
 
 import network.ConnectListener;
-import org.apache.commons.io.IOUtils;
 import protocol.FileTransferClient;
 import network.NetworkConnection;
 import protocol.Frame;
