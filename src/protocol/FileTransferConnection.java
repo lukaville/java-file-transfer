@@ -106,6 +106,8 @@ public class FileTransferConnection extends Thread {
     }
 
     public void sendFrame(Frame frame) {
+        System.out.println("Frame sent: " + frame.getType() + ". Length: " + frame.getData().length);
+
         try {
             connection.getOutputStream().write(frame.build());
         } catch (IOException e) {

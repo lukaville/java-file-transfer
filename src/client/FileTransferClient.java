@@ -1,25 +1,29 @@
 package client;
 
 import client.model.FileItem;
+import network.NetworkConnection;
+import protocol.*;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import network.NetworkConnection;
-import protocol.*;
 
 /**
  * Created by nickolay on 12.02.16.
  */
 public class FileTransferClient implements FrameListener, ClientCallbacks {
+    private ClientCallbacks callbacks = this;
     private FileTransferConnection connection;
 
     public FileTransferClient(NetworkConnection connection) {
         this.connection = new FileTransferConnection(connection, this);
         this.connection.start();
+    }
+
+    public FileTransferClient(NetworkConnection connection, ClientCallbacks callbacks) {
+        this(connection);
+        this.callbacks = callbacks;
     }
 
     public void requestList(String path) {
@@ -29,7 +33,8 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onFrameReceived(Frame frame) {
-        FrameParser.parseFrame(frame, this);
+        System.out.println("Frame received: " + frame.getType() + ". Length: " + frame.getData().length);
+        FrameParser.parseFrame(frame, callbacks);
     }
 
     @Override
