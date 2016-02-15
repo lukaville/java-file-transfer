@@ -71,10 +71,10 @@ public class FrameParser {
             if (!isName) {
                 flags = frameData[i];
                 isName = true;
-                nameStart = i;
+                nameStart = i + 1;
             } else {
                 if (frameData[i] == 0x00 && frameData[i - 1] == 0x00) {
-                    String name = new String(frameData, nameStart, i - nameStart, StandardCharsets.UTF_8);
+                    String name = new String(frameData, nameStart, i - nameStart - 1, StandardCharsets.UTF_8);
                     files.add(new FileItem(name, flags == 0x01));
                     isName = false;
                 }

@@ -20,6 +20,7 @@ public class FrameEncoder {
             frameDataLength += file.getName().getBytes(StandardCharsets.UTF_8).length + 3;
         }
         byte[] frameData = new byte[frameDataLength];
+        frameData[0] = (byte) 0x00; // status
 
         int currentIndex = 1;
         for(FileItem file : files) {

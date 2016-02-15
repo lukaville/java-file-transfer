@@ -1,7 +1,5 @@
 import client.ClientCallbacks;
 import client.model.FileItem;
-import java.util.List;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import protocol.Frame;
@@ -9,10 +7,9 @@ import protocol.FrameEncoder;
 import protocol.FrameParser;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by nickolay on 15.02.16.
