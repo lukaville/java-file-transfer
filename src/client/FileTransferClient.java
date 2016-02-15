@@ -15,14 +15,16 @@ import java.util.List;
 public class FileTransferClient implements FrameListener, ClientCallbacks {
     private ClientCallbacks callbacks = this;
     private FileTransferConnection connection;
+    private FileTransferClientListener listener;
 
-    public FileTransferClient(NetworkConnection connection) {
+    public FileTransferClient(NetworkConnection connection, FileTransferClientListener listener) {
         this.connection = new FileTransferConnection(connection, this);
         this.connection.start();
+        this.listener = listener;
     }
 
-    public FileTransferClient(NetworkConnection connection, ClientCallbacks callbacks) {
-        this(connection);
+    public FileTransferClient(NetworkConnection connection, FileTransferClientListener listener, ClientCallbacks callbacks) {
+        this(connection, listener);
         this.callbacks = callbacks;
     }
 
@@ -65,7 +67,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onList(List<FileItem> files) {
-
+        listener.onList(files);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class Application implements UiListener, FileTransferClientListener {
     public void onConnectButton(CommPortIdentifier port, int baudRate, int dataBits, int stopBits, int parity) {
         // TODO: serial port
         NetworkConnection connection = connect(baudRate == 0);
-        client = new FileTransferClient(connection);
+        client = new FileTransferClient(connection, this);
     }
 
     private NetworkConnection connect(boolean isServer) {
