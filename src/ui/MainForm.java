@@ -1,9 +1,9 @@
 package ui;
 
 import client.model.FileItem;
-import network.ConnectListener;
 
 import javax.swing.*;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -13,8 +13,8 @@ import java.util.List;
 public class MainForm {
     private static final String WINDOW_TITLE = "File transfer";
 
-    private Icon fileIcon = new ImageIcon("file.png");
-    private Icon folderIcon = new ImageIcon("folder.png");
+    private Icon fileIcon = new ImageIcon("res/file.png");
+    private Icon folderIcon = new ImageIcon("res/folder.png");
 
     private JButton connectButton;
     private JButton disconnectButton;
@@ -27,6 +27,7 @@ public class MainForm {
     public MainForm(UiListener uiListener) {
         this.uiListener = uiListener;
 
+        fileList.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
         fileList.setCellRenderer(new IconListRenderer(item -> {
             if (((FileItem) item).isDirectory()) {
                 return folderIcon;
@@ -59,6 +60,8 @@ public class MainForm {
     }
 
     public void updateFileList(List<FileItem> files) {
+        Collections.sort(files);
+        files.add(0, new FileItem("/", true));
         fileListModel.removeAllElements();
         files.forEach(fileListModel::addElement);
     }

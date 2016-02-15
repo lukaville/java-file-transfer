@@ -5,7 +5,7 @@ import java.io.File;
 /**
  * Created by nickolay on 12.02.16.
  */
-public class FileItem {
+public class FileItem implements Comparable<FileItem> {
     private String name;
     private boolean isDirectory;
 
@@ -47,5 +47,19 @@ public class FileItem {
         result = prime * result + name.hashCode();
         result += prime * result + (isDirectory ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(FileItem o) {
+        if (this.isDirectory() && o.isDirectory()) {
+            return this.name.compareTo(o.getName());
+        }
+        if (this.isDirectory()) {
+            return -1;
+        }
+        if (o.isDirectory()) {
+            return 1;
+        }
+        return this.name.compareTo(o.getName());
     }
 }
