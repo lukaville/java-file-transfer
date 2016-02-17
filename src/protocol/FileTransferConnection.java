@@ -35,10 +35,8 @@ public class FileTransferConnection extends Thread {
     public void run() {
         try {
             while (!interrupted()) {
-                if (connection.available() > 0) {
-                    byte data = connection.read();
-                    handleByte(data);
-                }
+                byte data = connection.read();
+                handleByte(data);
             }
         } catch (IOException e) {
             e.printStackTrace();
