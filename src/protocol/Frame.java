@@ -6,7 +6,7 @@ import java.util.Arrays;
  * Created by nickolay on 11.02.16.
  */
 public class Frame {
-    public static final byte START_BYTE = (byte) 0xFF;
+    public static final byte START_BYTE = (byte) 0x00;
     public static final byte STOP_BYTE = START_BYTE;
 
     public static final byte TYPE_CONNECT = (byte) 0x00;
@@ -52,10 +52,10 @@ public class Frame {
         result[frameSize - 1] = STOP_BYTE;
 
         if (dataSize != 0) {
-            result[2] = (byte) ((dataSize >> 24) & 0xFF);
-            result[3] = (byte) ((dataSize >> 16) & 0xFF);
-            result[4] = (byte) ((dataSize >> 8) & 0xFF);
-            result[5] = (byte) (dataSize & 0xFF);
+            result[5] = (byte) ((dataSize >> 24) & 0xFF);
+            result[4] = (byte) ((dataSize >> 16) & 0xFF);
+            result[3] = (byte) ((dataSize >> 8) & 0xFF);
+            result[2] = (byte) (dataSize & 0xFF);
             System.arraycopy(data, 0, result, 6, dataSize);
         }
 

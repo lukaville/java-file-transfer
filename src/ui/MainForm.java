@@ -3,6 +3,9 @@ package ui;
 import client.model.FileItem;
 
 import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +32,15 @@ public class MainForm {
     public MainForm(UiListener uiListener) {
         this.uiListener = uiListener;
 
+        fileList.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent evt) {
+                JList list = (JList) evt.getSource();
+                if (evt.getClickCount() == 2) {
+                    int index = list.locationToIndex(evt.getPoint());
+                    uiListener.onFileItemClick(fileListModel.get(index), pathTextField.getText());
+                }
+            }
+        });
         fileList.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
         fileList.setCellRenderer(new IconListRenderer(item -> {
             if (((FileItem) item).isDirectory()) {
@@ -68,5 +80,16 @@ public class MainForm {
         files.add(0, new FileItem("..", true));
         fileListModel.removeAllElements();
         files.forEach(fileListModel::addElement);
+    }
+
+    public void openSaveFileDialog(String name) {
+        final JFileChooser fc = new JFileChooser();
+        fc.setDialogTitle("Сохранение " + name);
+        fc.setSelectedFile(new File(name));
+        int returnVal = fc.showSaveDialog(panel);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+            System.out.println(file.getAbsolutePath());
+        }
     }
 }

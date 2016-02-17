@@ -11,7 +11,7 @@ public class FakeConnection extends NetworkConnection {
 
     public FakeConnection(byte[] fakeBytes) {
         this.bytes = fakeBytes;
-        currentByte = fakeBytes.length - 1;
+        currentByte = fakeBytes.length;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class FakeConnection extends NetworkConnection {
 
     @Override
     public byte read() throws IOException {
-        return bytes[currentByte--];
+        return bytes[bytes.length - currentByte--];
     }
 
     @Override

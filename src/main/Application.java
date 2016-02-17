@@ -9,6 +9,7 @@ import network.TcpNetworkConnection;
 import ui.MainForm;
 import ui.UiListener;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -47,6 +48,15 @@ public class Application implements UiListener, FileTransferClientListener {
     @Override
     public void onGetListButton(String path) {
         client.requestList(path);
+    }
+
+    @Override
+    public void onFileItemClick(FileItem fileItem, String path) {
+        if (fileItem.isDirectory()) {
+            client.requestList(path + File.separator + fileItem.getName());
+        } else {
+            mainForm.openSaveFileDialog(fileItem.getName());
+        }
     }
 
     private NetworkConnection connect(boolean isServer) {

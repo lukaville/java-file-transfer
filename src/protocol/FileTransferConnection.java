@@ -66,8 +66,8 @@ public class FileTransferConnection extends Thread {
 
             if (currentByte == BYTE_SIZE_INDEX_STOP) {
                 //big-endian
-                dataSize = ((dataSizeByteArray[0] & 0xFF) << 24) | ((dataSizeByteArray[1] & 0xFF) << 16)
-                        | ((dataSizeByteArray[2] & 0xFF) << 8) | (dataSizeByteArray[3] & 0xFF);
+                dataSize = ((dataSizeByteArray[3] & 0xFF) << 24) | ((dataSizeByteArray[2] & 0xFF) << 16)
+                        | ((dataSizeByteArray[1] & 0xFF) << 8) | (dataSizeByteArray[0] & 0xFF);
 
 
                 if (dataSize <= 0) {
@@ -124,5 +124,16 @@ public class FileTransferConnection extends Thread {
     public void disconnect() {
         connection.close();
         interrupt();
+    }
+
+    public void test() {
+        try {
+            while (connection.available() > 0) {
+                byte data = connection.read();
+                handleByte(data);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
