@@ -22,8 +22,7 @@ public class FrameParser {
                 listener.onGetList(directory);
                 return;
             case Frame.TYPE_LIST_DIRECTORY:
-                List<FileItem> files = parseFileList(frame);
-                listener.onList(files);
+                parseFileList(frame, listener);
                 return;
             case Frame.TYPE_GET_FILE:
                 String path = new String(frame.getData(), StandardCharsets.UTF_8);
@@ -54,20 +53,29 @@ public class FrameParser {
         }
     }
 
-    private static List<FileItem> parseFileList(Frame frame) {
+    private static void parseFileList(Frame frame, ClientCallbacks listener) {
         byte[] frameData = frame.getData();
 
         List<FileItem> files = new ArrayList<>();
+        String path = "";
         byte status = frameData[0];
 
+        int i = 1;
+        for (; i < 8192; ++i) {
+            if (frameData[i] == 0x00 && frameData[i - 1] == 0x00) {
+                path = new String(frameData, 1, i - 2, StandardCharsets.UTF_8);
+                break;
+            }
+        }
+
         if (status != 0x00) {
-            return null;
+            listener.onList(files, path);
         }
 
         boolean isName = false;
         byte flags = 0;
         int nameStart = 0;
-        for (int i = 1; i < frameData.length; ++i) {
+        for (++i; i < frameData.length; ++i) {
             if (!isName) {
                 flags = frameData[i];
                 isName = true;
@@ -81,6 +89,6 @@ public class FrameParser {
             }
         }
 
-        return files;
+        listener.onList(files, path);
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 public interface ClientCallbacks {
     void onConnect();
     void onGetList(String path);
-    void onList(List<FileItem> files);
+    void onList(List<FileItem> files, String path);
     void onGetFile(String path);
     void onFile(int status, int lengthBytes);
     void onFileBlock(int bytesFrom, byte[] data);

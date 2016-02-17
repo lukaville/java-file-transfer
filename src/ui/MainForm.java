@@ -20,6 +20,8 @@ public class MainForm {
     private JButton disconnectButton;
     private JList<FileItem> fileList;
     private JPanel panel;
+    private JTextField pathTextField;
+    private JButton getListButton;
     private final UiListener uiListener;
 
     private final DefaultListModel<FileItem> fileListModel;
@@ -41,6 +43,7 @@ public class MainForm {
 
         connectButton.addActionListener(e -> openConnectDialog());
         disconnectButton.addActionListener(e -> uiListener.onDisconnectButton());
+        getListButton.addActionListener(e -> uiListener.onGetListButton(pathTextField.getText()));
     }
 
     private void openConnectDialog() {
@@ -59,9 +62,10 @@ public class MainForm {
         frame.setVisible(true);
     }
 
-    public void updateFileList(List<FileItem> files) {
+    public void updateFileList(List<FileItem> files, String path) {
+        pathTextField.setText(path);
         Collections.sort(files);
-        files.add(0, new FileItem("/", true));
+        files.add(0, new FileItem("..", true));
         fileListModel.removeAllElements();
         files.forEach(fileListModel::addElement);
     }

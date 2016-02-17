@@ -35,7 +35,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onFrameReceived(Frame frame) {
-        System.out.println("Frame received: " + frame.getType() + ". Length: " + frame.getData().length);
+        System.out.println("Frame received: " + frame.getType() + '\n' + frame.toString() + "\n\n");
         FrameParser.parseFrame(frame, callbacks);
     }
 
@@ -48,26 +48,24 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     public void onGetList(String path) {
         List<FileItem> fileItems = new ArrayList<>();
 
-        if (path.equals(".")) {
-            path = Paths.get(".").toAbsolutePath().normalize().toString();
-        }
+        path = Paths.get(path).toAbsolutePath().normalize().toString();
 
         File directory = new File(path);
         File[] listOfFiles = directory.listFiles();
 
         if (listOfFiles == null) {
-            connection.sendFrame(FrameEncoder.encodeFileList(0x01, null));
+            connection.sendFrame(FrameEncoder.encodeFileList(0x01, null, path));
         } else {
             for (File file : listOfFiles) {
                 fileItems.add(new FileItem(file));
             }
-            connection.sendFrame(FrameEncoder.encodeFileList(0x00, fileItems));
+            connection.sendFrame(FrameEncoder.encodeFileList(0x00, fileItems, path));
         }
     }
 
     @Override
-    public void onList(List<FileItem> files) {
-        listener.onList(files);
+    public void onList(List<FileItem> files, String path) {
+        listener.onList(files, path);
     }
 
     @Override

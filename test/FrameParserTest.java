@@ -2,9 +2,7 @@ import client.ClientCallbacks;
 import client.model.FileItem;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import protocol.Frame;
-import protocol.FrameEncoder;
-import protocol.FrameParser;
+import protocol.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,12 +26,15 @@ public class FrameParserTest {
 
     @Test
     public void testFileList() {
+        String path = "/user/rdtfyguhijmk/hbunj/ouytrf";
+        Frame fileListFrame = FrameEncoder.encodeFileList(0x00, fileItemList, path);
+        FakeConnection connection = new FakeConnection(fileListFrame.build());
 
-        Frame fileListFrame = FrameEncoder.encodeFileList(0x00, fileItemList);
+       new FileTransferConnection(connection, frame -> {
+            ClientCallbacks callbacks = mock(ClientCallbacks.class);
+            FrameParser.parseFrame(fileListFrame, callbacks);
 
-        ClientCallbacks callbacks = mock(ClientCallbacks.class);
-        FrameParser.parseFrame(fileListFrame, callbacks);
-
-        verify(callbacks, times(1)).onList(fileItemList);
+            verify(callbacks, times(1)).onList(fileItemList, path);
+        }).run();
     }
 }

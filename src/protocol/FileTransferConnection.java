@@ -3,7 +3,6 @@ package protocol;
 import network.NetworkConnection;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by nickolay on 11.02.16.
@@ -12,12 +11,14 @@ public class FileTransferConnection extends Thread {
     public static final int NONE = -1;
     public static final int BYTE_START_INDEX = 0;
     public static final int BYTE_TYPE_INDEX = 1;
-    public static final int BYTE_SIZE_INDEX = 2;
+    public static final int BYTE_SIZE_INDEX_START = 2;
+    public static final int BYTE_SIZE_INDEX_STOP = 5;
 
     private int currentByte = NONE;
 
     // Current frame
     private int dataSize;
+    private byte[] dataSizeByteArray = new byte[4];
     private byte type;
     private byte[] data;
 
@@ -33,11 +34,9 @@ public class FileTransferConnection extends Thread {
     @Override
     public void run() {
         try {
-            InputStream inputStream = connection.getInputStream();
-
             while (!interrupted()) {
-                if (inputStream.available() > 0) {
-                    byte data = (byte) inputStream.read();
+                if (connection.available() > 0) {
+                    byte data = connection.read();
                     handleByte(data);
                 }
             }
@@ -62,20 +61,27 @@ public class FileTransferConnection extends Thread {
             return;
         }
 
-        if (currentByte == BYTE_SIZE_INDEX) {
-            // No data in frame
-            if (receivedByte == Frame.STOP_BYTE) {
-                currentByte = NONE;
-                onFrameReceived();
-            } else {
-                dataSize = receivedByte;
-                this.data = new byte[dataSize];
+        if (currentByte >= BYTE_SIZE_INDEX_START && currentByte <= BYTE_SIZE_INDEX_STOP) {
+            dataSizeByteArray[currentByte - BYTE_SIZE_INDEX_START] = receivedByte;
+
+            if (currentByte == BYTE_SIZE_INDEX_STOP) {
+                //big-endian
+                dataSize = ((dataSizeByteArray[0] & 0xFF) << 24) | ((dataSizeByteArray[1] & 0xFF) << 16)
+                        | ((dataSizeByteArray[2] & 0xFF) << 8) | (dataSizeByteArray[3] & 0xFF);
+
+
+                if (dataSize <= 0) {
+                    currentByte = NONE;
+                    onFrameReceived();
+                } else {
+                    this.data = new byte[dataSize];
+                }
             }
             return;
         }
 
         // End byte
-        if (currentByte > (BYTE_SIZE_INDEX + dataSize)) {
+        if (currentByte > (BYTE_SIZE_INDEX_STOP + dataSize)) {
             if (receivedByte == Frame.STOP_BYTE) {
                 currentByte = NONE;
                 onFrameReceived();
@@ -87,8 +93,8 @@ public class FileTransferConnection extends Thread {
         }
 
         // Data bytes
-        if (currentByte > BYTE_SIZE_INDEX) {
-            data[currentByte - BYTE_SIZE_INDEX - 1] = receivedByte;
+        if (currentByte > BYTE_SIZE_INDEX_STOP) {
+            data[currentByte - BYTE_SIZE_INDEX_STOP - 1] = receivedByte;
         }
     }
 
@@ -106,7 +112,7 @@ public class FileTransferConnection extends Thread {
     }
 
     public void sendFrame(Frame frame) {
-        System.out.println("Frame sent: " + frame.getType() + ". Length: " + frame.getData().length);
+        System.out.println("Frame sent: " + frame.getType() + '\n' + frame.toString() + "\n\n");
 
         try {
             connection.getOutputStream().write(frame.build());

@@ -2,55 +2,73 @@ package util;
 
 import com.sun.istack.internal.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.BitSet;
 
 /**
  * alex on 12.02.16.
  */
 public class HammingUtils {
-    public static byte[] cycleEncode(byte[] origin) {
-        int encodedSize = origin.length % 11 == 0 ? origin.length / 11 * 15 : origin.length / 11 * 15 + 15;
-        byte[] encoded = new byte[encodedSize];
-
-        for (int i = 0, j = 0; i < origin.length; i += 11, j += 15) {
-            byte[] part;
-            if (i + 11 < origin.length) {
-                part = Arrays.copyOfRange(origin, i, i + 11);
-            } else {
-                part = new byte[11];
-                System.arraycopy(origin, i, part, 0, origin.length - i);
-            }
-
-            byte[] encodedPart = encode(part);
-
-            System.arraycopy(encodedPart, 0, encoded, j, encodedPart.length);
+    private static void copyBitSetToBitSet(BitSet src, int srcPos, BitSet dest, int destPos, int length) {
+        BitSet srcPart = src.get(srcPos, srcPos + length);
+        for (int i = 0, j = destPos; i < length; ++i, ++j) {
+            dest.set(j, srcPart.get(i));
         }
-
-        return encoded;
     }
 
-    private static byte[] encode(byte[] origin) {
-        byte[] encoded = new byte[(int) (origin.length + Math.log(origin.length) / Math.log(2) + 1)];
+    private static void reverseBitSet(BitSet bitSet, int size) {
+        BitSet ret = new BitSet(size);
+        for (int i = 0; i < size; ++i) {
+            ret.set(size - i - 1, bitSet.get(i));
+        }
+        bitSet = ret;
+    }
 
-        for (int i = 1, j = origin.length - 1; i <= encoded.length; ++i) {
-            if (Math.log(i) / Math.log(2) % 1 == 0) {
-                encoded[encoded.length - i] = 0;
+    public static byte[] cycleEncode(byte[] origin) {
+        BitSet originBitSet = BitSet.valueOf(origin);
+        int encodedSize = originBitSet.size() % 11 == 0 ? originBitSet.size() / 11 * 15 : originBitSet.size() / 11 * 15 + 15;
+        BitSet encoded = new BitSet(encodedSize);
+
+        for (int i = 0, j = 0; i < originBitSet.size(); i += 11, j += 15) {
+            BitSet part;
+            if (i + 11 < originBitSet.size()) {
+                part = originBitSet.get(i, i + 11);
+//                part = Arrays.copyOfRange(origin, i, i + 11);
             } else {
-                encoded[encoded.length - i] = origin[j];
+                part = new BitSet(11);
+                copyBitSetToBitSet(originBitSet, i, part, 0, originBitSet.size() - i);
+//                System.arraycopy(origin, i, part, 0, origin.length - i);
+            }
+
+            BitSet encodedPart = encode(part);
+
+            copyBitSetToBitSet(encodedPart, 0, encoded, j, encodedPart.size());
+//            System.arraycopy(encodedPart, 0, encoded, j, encodedPart.length);
+        }
+
+        return encoded.toByteArray();
+    }
+
+    private static BitSet encode(BitSet origin) {
+        BitSet encoded = new BitSet((int) (origin.size() + Math.log(origin.size()) / Math.log(2) + 1));
+
+        for (int i = 1, j = origin.size() - 1; i <= encoded.size(); ++i) {
+            if (Math.log(i) / Math.log(2) % 1 == 0) {
+                encoded.set(encoded.size() - i, 0);
+            } else {
+                encoded.set(encoded.size() - i, origin.get(j));
                 --j;
             }
         }
 
-        for (int bitmask = 1, j = 0; j < (int) (Math.log(encoded.length) / Math.log(2)) + 1; bitmask <<= 1, ++j) {
+        for (int bitmask = 1, j = 0; j < (int) (Math.log(encoded.size()) / Math.log(2)) + 1; bitmask <<= 1, ++j) {
             int countOfBits = 0;
-            for (int i = bitmask; i <= encoded.length; ++i) {
+            for (int i = bitmask; i <= encoded.size(); ++i) {
                 if ((i & bitmask) != 0) {
-                    countOfBits += encoded[encoded.length - i];
+                    countOfBits += (encoded.get(encoded.size() - i) ? 1 : 0);
                 }
             }
             countOfBits %= 2;
-            encoded[encoded.length - bitmask] = (byte) countOfBits;
+            encoded.set(encoded.size() - bitmask, countOfBits);
         }
 
         return encoded;
@@ -62,35 +80,41 @@ public class HammingUtils {
             return null;
         }
 
-        byte[] decoded = new byte[encoded.length / 15 * 11];
-        for (int i = 0, j = 0; i < encoded.length; i += 15, j += 11) {
-            byte[] part = Arrays.copyOfRange(encoded, i, i + 15);
-            byte[] decodedPart = decode(part);
+        BitSet encodedBitSet = BitSet.valueOf(encoded);
+        BitSet decoded = new BitSet(encodedBitSet.size() / 15 * 11);
 
-            System.arraycopy(decodedPart, 0, decoded, j, decodedPart.length);
+        for (int i = 0, j = 0; i < encodedBitSet.size(); i += 15, j += 11) {
+            BitSet part = encodedBitSet.get(i, i + 15);
+            BitSet decodedPart = decode(part);
+
+            copyBitSetToBitSet(decodedPart, 0, decoded, j, decodedPart.size());
+//            System.arraycopy(decodedPart, 0, decoded, j, decodedPart.length);
         }
 
-        return decoded;
+        return decoded.toByteArray();
     }
 
-    private static byte[] decode(byte[] encoded) {
-        byte[] decoded = new byte[encoded.length - (int) (Math.log(encoded.length) / Math.log(2)) - 1];
+    private static BitSet decode(BitSet encoded) {
+        BitSet decoded = new BitSet(encoded.size() - (int) (Math.log(encoded.size()) / Math.log(2)) - 1);
 
-        for (int i = encoded.length - 1, j = 0; i >= 0; --i) {
-            if (Math.log(encoded.length - i) / Math.log(2) % 1 != 0) {
-                decoded[j] = encoded[i];
+        for (int i = encoded.size() - 1, j = 0; i >= 0; --i) {
+            if (Math.log(encoded.size() - i) / Math.log(2) % 1 != 0) {
+                decoded.set(j, encoded.get(i));
                 ++j;
             }
         }
 
-        Collections.reverse(Arrays.asList(decoded));
+//        reverseBitSet(decoded); TODO
+//        Collections.reverse(decoded);
 
         return decoded;
     }
 
     public static boolean cycleValidateEncoded(byte[] encoded) {
-        for (int i = 0; i < encoded.length; i += 15) {
-            byte[] part = Arrays.copyOfRange(encoded, i, i + 15);
+        BitSet encodedBitSet = BitSet.valueOf(encoded);
+
+        for (int i = 0; i < encodedBitSet.size(); i += 15) {
+            BitSet part = encodedBitSet.get(i, i + 15);
 
             if (!validateEncoded(part)) {
                 return false;
@@ -100,22 +124,20 @@ public class HammingUtils {
         return true;
     }
 
-    private static boolean validateEncoded(byte[] encoded) {
-        byte[] errorSyndrome = new byte[(int) (Math.log(encoded.length) / Math.log(2)) + 1];
+    private static boolean validateEncoded(BitSet encoded) {
+        BitSet errorSyndrome = new BitSet((int) (Math.log(encoded.size()) / Math.log(2)) + 1);
 
-        for (int bitmask = 1, j = 0; j < (int) (Math.log(encoded.length) / Math.log(2)) + 1; bitmask <<= 1, ++j) {
+        for (int bitmask = 1, j = 0; j < (int) (Math.log(encoded.size()) / Math.log(2)) + 1; bitmask <<= 1, ++j) {
             int countOfBits = 0;
-            for (int i = bitmask; i <= encoded.length; ++i) {
+            for (int i = bitmask; i <= encoded.size(); ++i) {
                 if ((i & bitmask) != 0) {
-                    countOfBits += encoded[encoded.length - i];
+                    countOfBits += (encoded.get(encoded.size() - i) ? 1 : 0);
                 }
             }
             countOfBits %= 2;
-            errorSyndrome[j] = (byte) countOfBits;
+            errorSyndrome.set(j, countOfBits);
         }
 
-        Collections.reverse(Arrays.asList(errorSyndrome));
-
-        return ByteUtils.byteArrayToInt(errorSyndrome) == 0;
+        return errorSyndrome.length() == 0;
     }
 }

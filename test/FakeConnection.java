@@ -6,46 +6,30 @@ import java.io.*;
  * Created by nickolay on 15.02.16.
  */
 public class FakeConnection extends NetworkConnection {
+    private final byte[] bytes;
+    private int currentByte = 0;
 
-    private PipedInputStream in;
-    private PipedOutputStream out;
-
-    public FakeConnection() {
-        try {
-            in = new PipedInputStream();
-            out = new PipedOutputStream(in);
-
-            new Thread(() -> {
-                while (true) {
-                    try {
-                        out.write(in.read());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public FakeConnection(byte[] fakeBytes) {
+        this.bytes = fakeBytes;
+        currentByte = fakeBytes.length - 1;
     }
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        return out;
+        return null;
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
-        return in;
+    public int available() throws IOException {
+        return currentByte;
+    }
+
+    @Override
+    public byte read() throws IOException {
+        return bytes[currentByte--];
     }
 
     @Override
     public void close() {
-        try {
-            in.close();
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

@@ -1,9 +1,11 @@
 package network;
 
-import gnu.io.*;
+import gnu.io.CommPortIdentifier;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.UnsupportedCommOperationException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -24,8 +26,13 @@ public class SerialNetworkConnection extends NetworkConnection {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
-        return port.getInputStream();
+    public int available() throws IOException {
+        return port.getInputStream().available();
+    }
+
+    @Override
+    public byte read() throws IOException {
+        return (byte) port.getInputStream().read();
     }
 
     @Override

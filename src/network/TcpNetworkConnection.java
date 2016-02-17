@@ -1,7 +1,6 @@
 package network;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -27,8 +26,13 @@ public class TcpNetworkConnection extends NetworkConnection {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
-        return socket.getInputStream();
+    public int available() throws IOException {
+        return socket.getInputStream().available();
+    }
+
+    @Override
+    public byte read() throws IOException {
+        return (byte) socket.getInputStream().read();
     }
 
     @Override

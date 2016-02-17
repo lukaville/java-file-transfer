@@ -29,12 +29,12 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onDisconnectButton() {
-        client.requestList(".");
+
     }
 
     @Override
-    public void onList(List<FileItem> files) {
-        mainForm.updateFileList(files);
+    public void onList(List<FileItem> files, String path) {
+        mainForm.updateFileList(files, path);
     }
 
     @Override
@@ -42,6 +42,11 @@ public class Application implements UiListener, FileTransferClientListener {
         // TODO: serial port
         NetworkConnection connection = connect(baudRate == 0);
         client = new FileTransferClient(connection, this);
+    }
+
+    @Override
+    public void onGetListButton(String path) {
+        client.requestList(path);
     }
 
     private NetworkConnection connect(boolean isServer) {
