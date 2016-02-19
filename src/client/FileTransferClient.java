@@ -33,6 +33,10 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
                 path.getBytes()));
     }
 
+    public void connect() {
+        connection.sendFrame(new Frame(Frame.TYPE_CONNECT));
+    }
+
     @Override
     public void onFrameReceived(Frame frame) {
         System.out.println("Frame received: " + frame.getType() + '\n' + frame.toString() + "\n\n");
@@ -41,7 +45,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onConnect() {
-
+        listener.onConnect();
     }
 
     @Override
@@ -105,6 +109,6 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onDisconnect() {
-
+        listener.onDisconnect();
     }
 }

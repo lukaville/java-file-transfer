@@ -18,6 +18,8 @@ public class MainForm {
 
     private Icon fileIcon = new ImageIcon("res/file.png");
     private Icon folderIcon = new ImageIcon("res/folder.png");
+    private Icon warningIcon = new ImageIcon("res/status_warning.png");
+    private Icon okIcon = new ImageIcon("res/status_ok.png");
 
     private JButton connectButton;
     private JButton disconnectButton;
@@ -25,6 +27,7 @@ public class MainForm {
     private JPanel panel;
     private JTextField pathTextField;
     private JButton getListButton;
+    private JLabel statusLabel;
     private final UiListener uiListener;
 
     private final DefaultListModel<FileItem> fileListModel;
@@ -56,6 +59,8 @@ public class MainForm {
         connectButton.addActionListener(e -> openConnectDialog());
         disconnectButton.addActionListener(e -> uiListener.onDisconnectButton());
         getListButton.addActionListener(e -> uiListener.onGetListButton(pathTextField.getText()));
+
+        statusLabel.setIcon(warningIcon);
     }
 
     private void openConnectDialog() {
@@ -80,6 +85,10 @@ public class MainForm {
         files.add(0, new FileItem("..", true));
         fileListModel.removeAllElements();
         files.forEach(fileListModel::addElement);
+    }
+
+    public void setStatus(boolean isOk) {
+        statusLabel.setIcon(isOk ? okIcon : warningIcon);
     }
 
     public void openSaveFileDialog(String name) {
