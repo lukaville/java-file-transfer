@@ -39,10 +39,21 @@ public class Application implements UiListener, FileTransferClientListener {
     }
 
     @Override
+    public void onConnect() {
+        mainForm.setStatus(true);
+    }
+
+    @Override
+    public void onDisconnect() {
+        mainForm.setStatus(false);
+    }
+
+    @Override
     public void onConnectButton(CommPortIdentifier port, int baudRate, int dataBits, int stopBits, int parity) {
         // TODO: serial port
         NetworkConnection connection = connect(baudRate == 0);
         client = new FileTransferClient(connection, this);
+        client.connect();
     }
 
     @Override

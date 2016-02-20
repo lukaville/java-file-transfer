@@ -64,6 +64,10 @@ public class Frame {
 
     @Override
     public String toString() {
+        if (data == null) {
+            return "No data";
+        }
+
         return "Length: " + data.length + ". Hash: " + Arrays.hashCode(data) + '\n' + bytesToHex(data);
     }
 
