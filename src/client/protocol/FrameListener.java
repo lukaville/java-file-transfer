@@ -1,4 +1,4 @@
-package protocol;
+package client.protocol;
 
 /**
  * Created by nickolay on 11.02.16.

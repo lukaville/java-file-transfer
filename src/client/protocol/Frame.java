@@ -1,4 +1,6 @@
-package protocol;
+package client.protocol;
+
+import util.ByteUtils;
 
 import java.util.Arrays;
 
@@ -52,10 +54,7 @@ public class Frame {
         result[frameSize - 1] = STOP_BYTE;
 
         if (dataSize != 0) {
-            result[5] = (byte) ((dataSize >> 24) & 0xFF);
-            result[4] = (byte) ((dataSize >> 16) & 0xFF);
-            result[3] = (byte) ((dataSize >> 8) & 0xFF);
-            result[2] = (byte) (dataSize & 0xFF);
+            ByteUtils.intToBytes(result, frameSize, 2);
             System.arraycopy(data, 0, result, 6, dataSize);
         }
 

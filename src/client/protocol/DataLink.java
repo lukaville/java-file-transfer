@@ -1,13 +1,14 @@
-package protocol;
+package client.protocol;
 
 import network.NetworkConnection;
+import util.ByteUtils;
 
 import java.io.IOException;
 
 /**
  * Created by nickolay on 11.02.16.
  */
-public class FileTransferConnection extends Thread {
+public class DataLink extends Thread {
     public static final int NONE = -1;
     public static final int BYTE_START_INDEX = 0;
     public static final int BYTE_TYPE_INDEX = 1;
@@ -26,7 +27,7 @@ public class FileTransferConnection extends Thread {
 
     private NetworkConnection connection;
 
-    public FileTransferConnection(NetworkConnection connection, FrameListener listener) {
+    public DataLink(NetworkConnection connection, FrameListener listener) {
         this.connection = connection;
         this.listener = listener;
     }
@@ -63,10 +64,7 @@ public class FileTransferConnection extends Thread {
             dataSizeByteArray[currentByte - BYTE_SIZE_INDEX_START] = receivedByte;
 
             if (currentByte == BYTE_SIZE_INDEX_STOP) {
-                //big-endian
-                dataSize = ((dataSizeByteArray[3] & 0xFF) << 24) | ((dataSizeByteArray[2] & 0xFF) << 16)
-                        | ((dataSizeByteArray[1] & 0xFF) << 8) | (dataSizeByteArray[0] & 0xFF);
-
+                dataSize = ByteUtils.byteArrayToInt(dataSizeByteArray);
 
                 if (dataSize <= 0) {
                     currentByte = NONE;

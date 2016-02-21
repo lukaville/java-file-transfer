@@ -12,8 +12,8 @@ public interface ClientCallbacks {
     void onGetList(String path);
     void onList(List<FileItem> files, String path);
     void onGetFile(String path);
-    void onFile(int status, int lengthBytes);
-    void onFileBlock(int bytesFrom, byte[] data);
+    void onFile(int status, int lengthBytes, int blockSize);
+    void onFileBlock(int blockNumber, byte[] data);
     void onFileBlockReceiveSuccess();
     void onFileBlockReceiveFail();
     void onFileCancel();

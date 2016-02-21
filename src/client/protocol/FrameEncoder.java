@@ -1,7 +1,10 @@
-package protocol;
+package client.protocol;
 
 import client.model.FileItem;
+import util.HammingUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -33,6 +36,17 @@ public class FrameEncoder {
         }
 
         return new Frame(Frame.TYPE_LIST_DIRECTORY, frameData);
+    }
+    
+    public static Frame encodeFilePart(InputStream fileStream, int blockSize, int blockNumber) {
+        byte[] frameData = new byte[blockSize];
+        try {
+            fileStream.read(frameData, blockSize * blockNumber, blockSize);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        frameData = HammingUtils.cycleEncode(frameData);
+        return new Frame(Frame.TYPE_FILE_DATA, frameData);
     }
 
     public static int writeString(byte[] arr, String str, int offset) {

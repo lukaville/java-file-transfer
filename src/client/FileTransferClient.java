@@ -1,8 +1,8 @@
 package client;
 
 import client.model.FileItem;
+import client.protocol.*;
 import network.NetworkConnection;
-import protocol.*;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -14,11 +14,11 @@ import java.util.List;
  */
 public class FileTransferClient implements FrameListener, ClientCallbacks {
     private ClientCallbacks callbacks = this;
-    private FileTransferConnection connection;
+    private DataLink connection;
     private FileTransferClientListener listener;
 
     public FileTransferClient(NetworkConnection connection, FileTransferClientListener listener) {
-        this.connection = new FileTransferConnection(connection, this);
+        this.connection = new DataLink(connection, this);
         this.connection.start();
         this.listener = listener;
     }
@@ -40,7 +40,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     @Override
     public void onFrameReceived(Frame frame) {
         System.out.println("Frame received: " + frame.getType() + '\n' + frame.toString() + "\n\n");
-        FrameParser.parseFrame(frame, callbacks);
+        FrameDecoder.parseFrame(frame, callbacks);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     }
 
     @Override
-    public void onFile(int status, int lengthBytes) {
+    public void onFile(int status, int lengthBytes, int blockSize) {
 
     }
 

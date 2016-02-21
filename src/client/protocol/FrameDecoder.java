@@ -1,7 +1,9 @@
-package protocol;
+package client.protocol;
 
 import client.ClientCallbacks;
 import client.model.FileItem;
+import util.ByteUtils;
+import util.HammingUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ import java.util.List;
 /**
  * Created by nickolay on 12.02.16.
  */
-public class FrameParser {
+public class FrameDecoder {
     public static void parseFrame(Frame frame, ClientCallbacks listener) {
         byte type = frame.getType();
         switch (type) {
@@ -30,10 +32,16 @@ public class FrameParser {
                 return;
             case Frame.TYPE_GET_FILE_RESPONSE:
                 int status = frame.getData()[0];
-                //int fileLength = frame.getData()[1];
-                //listener.onFile();
+                int fileLength = ByteUtils.bytesToInt(frame.getData(), 1);
+                int blockSize = ByteUtils.bytesToInt(frame.getData(), 5);
+                listener.onFile(status, fileLength, blockSize);
                 return;
             case Frame.TYPE_FILE_DATA:
+                int blockNumber = ByteUtils.bytesToInt(frame.getData(), 0);
+                blockSize = frame.getData().length - 4;
+                byte[] blockBytes = new byte[blockSize];
+                System.arraycopy(frame.getData(), 4, blockBytes, 0, blockSize);
+                listener.onFileBlock(blockNumber, HammingUtils.cycleEncode(blockBytes));
                 return;
             case Frame.TYPE_FILE_DATA_SUCCESS:
                 listener.onFileBlockReceiveSuccess();
@@ -49,7 +57,6 @@ public class FrameParser {
                 return;
             case Frame.TYPE_DISCONNECT:
                 listener.onDisconnect();
-                return;
         }
     }
 
