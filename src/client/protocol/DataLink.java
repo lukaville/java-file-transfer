@@ -108,7 +108,7 @@ public class DataLink extends Thread {
     }
 
     public void sendFrame(Frame frame) {
-        System.out.println("Frame sent: " + frame.getType() + '\n' + frame.toString() + "\n\n");
+        System.out.println("\n\nFRAME SENT\n" + frame.toString());
 
         try {
             connection.getOutputStream().write(frame.build());

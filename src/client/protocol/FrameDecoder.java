@@ -21,6 +21,7 @@ public class FrameDecoder {
                 return;
             case Frame.TYPE_GET_LIST_DIRECTORY:
                 String directory = new String(frame.getData(), StandardCharsets.UTF_8);
+                System.out.println("Directory: " + directory);
                 listener.onGetList(directory);
                 return;
             case Frame.TYPE_LIST_DIRECTORY:
@@ -28,12 +29,14 @@ public class FrameDecoder {
                 return;
             case Frame.TYPE_GET_FILE:
                 String path = new String(frame.getData(), StandardCharsets.UTF_8);
+                System.out.println("Path: " + path);
                 listener.onGetFile(path);
                 return;
             case Frame.TYPE_GET_FILE_RESPONSE:
                 int status = frame.getData()[0];
                 int fileLength = ByteUtils.bytesToInt(frame.getData(), 1);
                 int blockSize = ByteUtils.bytesToInt(frame.getData(), 5);
+                System.out.printf("Status: %d. File length: %d. Block size: %d.%n", status, fileLength, blockSize);
                 listener.onFile(status, fileLength, blockSize);
                 return;
             case Frame.TYPE_FILE_DATA:
@@ -41,7 +44,9 @@ public class FrameDecoder {
                 blockSize = frame.getData().length - 4;
                 byte[] blockBytes = new byte[blockSize];
                 System.arraycopy(frame.getData(), 4, blockBytes, 0, blockSize);
-                listener.onFileBlock(blockNumber, HammingUtils.cycleDecode(blockBytes));
+                byte[] decoded = HammingUtils.cycleDecode(blockBytes);
+                System.out.printf("Block number: %d. Decoded data length: %d%n", blockNumber, decoded == null ? 0 : decoded.length);
+                listener.onFileBlock(blockNumber, decoded);
                 return;
             case Frame.TYPE_FILE_DATA_SUCCESS:
                 listener.onFileBlockReceiveSuccess();
@@ -96,6 +101,7 @@ public class FrameDecoder {
             }
         }
 
+        System.out.println("File list length: " + files.size());
         listener.onList(files, path);
     }
 }

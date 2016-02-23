@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
+import static java.nio.file.StandardOpenOption.CREATE;
 
 /**
  * Created by nickolay on 12.02.16.
@@ -32,7 +32,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     private int currentWriteFileLength;
     private int currentWriteBlockSize;
     private Path currentWriteFile;
-    private OpenOption[] FILE_WRITE_OPTIONS = new OpenOption[] { APPEND, CREATE_NEW };
+    private OpenOption[] FILE_WRITE_OPTIONS = new OpenOption[] { APPEND, CREATE };
 
     // Current file for read
     private FileInputStream currentReadFileStream;
@@ -68,7 +68,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onFrameReceived(Frame frame) {
-        System.out.println("Frame received: " + frame.getType() + '\n' + frame.toString() + "\n\n");
+        System.out.println("\n\nFRAME RECEIVED\n" + frame.toString());
         FrameDecoder.parseFrame(frame, callbacks);
     }
 

@@ -21,8 +21,23 @@ public class Frame {
     public static final byte TYPE_FILE_DATA_SUCCESS = (byte) 0x07;
     public static final byte TYPE_FILE_DATA_RETRY = (byte) 0x08;
     public static final byte TYPE_FILE_DATA_CANCEL = (byte) 0x09;
-    public static final byte TYPE_GET_FILE_END = (byte) 0x10;
-    public static final byte TYPE_DISCONNECT = (byte) 0x11;
+    public static final byte TYPE_GET_FILE_END = (byte) 0x0A;
+    public static final byte TYPE_DISCONNECT = (byte) 0x0B;
+
+    private static final String[] FRAME_TYPE_DESCRIPTIONS = {
+            "connect",
+            "set_speed",
+            "get_list_directory",
+            "list_directory",
+            "get_file",
+            "get_file_response",
+            "file_data",
+            "file_data_success",
+            "file_data_retry",
+            "file_data_cancel",
+            "file_data_end",
+            "file_data_disconnect"
+    };
 
     private byte type = TYPE_CONNECT;
     private byte[] data;
@@ -63,21 +78,11 @@ public class Frame {
 
     @Override
     public String toString() {
-        if (data == null) {
-            return "No data";
-        }
+        StringBuilder sb = new StringBuilder();
 
-        return "Length: " + data.length + ". Hash: " + Arrays.hashCode(data) + '\n' + bytesToHex(data);
-    }
+        sb.append("Frame type: ").append(FRAME_TYPE_DESCRIPTIONS[type]).append("\n");
+        sb.append("Length: ").append(data == null ? 0 : data.length).append(".");
 
-    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
-    public static String bytesToHex(byte[] bytes) {
-        char[] hexChars = new char[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
-        }
-        return new String(hexChars);
+        return sb.toString();
     }
 }
