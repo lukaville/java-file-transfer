@@ -1,10 +1,9 @@
 package client.protocol;
 
 import client.model.FileItem;
+import util.ByteUtils;
 import util.HammingUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -37,19 +36,30 @@ public class FrameEncoder {
 
         return new Frame(Frame.TYPE_LIST_DIRECTORY, frameData);
     }
+
+    public static Frame encodeGetFile(String remotePath) {
+        return new Frame(Frame.TYPE_GET_FILE, remotePath.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static Frame encodeGetFileResponse(int status, int fileLength, int blockSize) {
+        byte[] frameData = new byte[1 + 4 + 4];
+        frameData[0] = (byte) status;
+
+        ByteUtils.intToBytes(frameData, fileLength, 1);
+        ByteUtils.intToBytes(frameData, blockSize, 5);
+
+        return new Frame(Frame.TYPE_GET_FILE_RESPONSE, frameData);
+    }
     
-    public static Frame encodeFilePart(InputStream fileStream, int blockSize, int blockNumber) {
-        byte[] frameData = new byte[blockSize];
-        try {
-            fileStream.read(frameData, blockSize * blockNumber, blockSize);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        frameData = HammingUtils.cycleEncode(frameData);
+    public static Frame encodeFilePart(byte[] block, int blockNumber) {
+        byte[] encodedBlock = HammingUtils.cycleEncode(block);
+        byte[] frameData = new byte[block.length + 4];
+        ByteUtils.intToBytes(frameData, blockNumber, 0);
+        System.arraycopy(encodedBlock, 0, frameData, 5, encodedBlock.length);
         return new Frame(Frame.TYPE_FILE_DATA, frameData);
     }
 
-    public static int writeString(byte[] arr, String str, int offset) {
+    private static int writeString(byte[] arr, String str, int offset) {
         byte[] nameBytes = str.getBytes(StandardCharsets.UTF_8);
         System.arraycopy(nameBytes, 0, arr, offset, nameBytes.length);
         arr[offset + nameBytes.length] = (byte) 0x00; // zero-symbol

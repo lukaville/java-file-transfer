@@ -41,7 +41,7 @@ public class FrameDecoder {
                 blockSize = frame.getData().length - 4;
                 byte[] blockBytes = new byte[blockSize];
                 System.arraycopy(frame.getData(), 4, blockBytes, 0, blockSize);
-                listener.onFileBlock(blockNumber, HammingUtils.cycleEncode(blockBytes));
+                listener.onFileBlock(blockNumber, HammingUtils.cycleDecode(blockBytes));
                 return;
             case Frame.TYPE_FILE_DATA_SUCCESS:
                 listener.onFileBlockReceiveSuccess();

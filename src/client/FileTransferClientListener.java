@@ -9,6 +9,7 @@ import java.util.List;
  */
 public interface FileTransferClientListener {
     void onList(List<FileItem> files, String path);
+    void onFileError(int status);
     void onConnect();
     void onDisconnect();
 }
