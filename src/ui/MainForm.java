@@ -91,14 +91,18 @@ public class MainForm {
         statusLabel.setIcon(isOk ? okIcon : warningIcon);
     }
 
-    public void openSaveFileDialog(String name) {
+    public void openSaveFileDialog(String name, OnFileSaveDialogListener listener) {
         final JFileChooser fc = new JFileChooser();
         fc.setDialogTitle("Сохранение " + name);
         fc.setSelectedFile(new File(name));
         int returnVal = fc.showSaveDialog(panel);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
-            System.out.println(file.getAbsolutePath());
+            listener.onFileSave(file.getAbsolutePath());
         }
+    }
+
+    public interface OnFileSaveDialogListener {
+        void onFileSave(String localPath);
     }
 }

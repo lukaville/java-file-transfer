@@ -61,7 +61,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         connection.sendFrame(new Frame(Frame.TYPE_CONNECT));
     }
 
-    public void requestFile(String remotePath, String localPath) throws IOException {
+    public void requestFile(String remotePath, String localPath) {
         currentWriteFile = Paths.get(localPath);
         connection.sendFrame(FrameEncoder.encodeGetFile(remotePath));
     }

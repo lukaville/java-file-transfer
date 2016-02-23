@@ -39,6 +39,11 @@ public class Application implements UiListener, FileTransferClientListener {
     }
 
     @Override
+    public void onFileError(int status) {
+
+    }
+
+    @Override
     public void onConnect() {
         mainForm.setStatus(true);
     }
@@ -62,11 +67,13 @@ public class Application implements UiListener, FileTransferClientListener {
     }
 
     @Override
-    public void onFileItemClick(FileItem fileItem, String path) {
+    public void onFileItemClick(FileItem fileItem, String remotePath) {
         if (fileItem.isDirectory()) {
-            client.requestList(path + File.separator + fileItem.getName());
+            client.requestList(remotePath + File.separator + fileItem.getName());
         } else {
-            mainForm.openSaveFileDialog(fileItem.getName());
+            mainForm.openSaveFileDialog(fileItem.getName(), localPath -> {
+                client.requestFile(remotePath, localPath);
+            });
         }
     }
 
