@@ -40,7 +40,7 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onFileError(int status) {
-
+        System.out.println("Can't download file: error #" + status);
     }
 
     @Override
@@ -68,11 +68,13 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onFileItemClick(FileItem fileItem, String remotePath) {
+        String newRemotePath = remotePath + File.separator + fileItem.getName();
+
         if (fileItem.isDirectory()) {
-            client.requestList(remotePath + File.separator + fileItem.getName());
+            client.requestList(newRemotePath);
         } else {
             mainForm.openSaveFileDialog(fileItem.getName(), localPath -> {
-                client.requestFile(remotePath, localPath);
+                client.requestFile(newRemotePath, localPath);
             });
         }
     }
