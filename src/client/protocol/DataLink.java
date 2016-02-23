@@ -64,7 +64,7 @@ public class DataLink extends Thread {
             dataSizeByteArray[currentByte - BYTE_SIZE_INDEX_START] = receivedByte;
 
             if (currentByte == BYTE_SIZE_INDEX_STOP) {
-                dataSize = ByteUtils.byteArrayToInt(dataSizeByteArray);
+                dataSize = ByteUtils.bytesToInt(dataSizeByteArray, 0);
 
                 if (dataSize <= 0) {
                     currentByte = NONE;

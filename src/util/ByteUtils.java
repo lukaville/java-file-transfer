@@ -4,17 +4,9 @@ package util;
  * alex on 12.02.16.
  */
 public class ByteUtils {
-    public static int byteArrayToInt(byte[] array) {
-        int result = 0;
-        for (int i = 0; i < array.length; ++i) {
-            result += array[array.length - i - 1] * Math.pow(2, i);
-        }
-        return result;
-    }
-
     public static int bytesToInt(byte[] arr, int offset) {
         return ((arr[3 + offset] & 0xFF) << 24) |
-                ((arr[2 + offset] & 0xFF) << 16)|
+                ((arr[2 + offset] & 0xFF) << 16) |
                 ((arr[1 + offset] & 0xFF) << 8) |
                 (arr[offset] & 0xFF);
     }

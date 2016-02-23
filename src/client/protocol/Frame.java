@@ -54,7 +54,7 @@ public class Frame {
         result[frameSize - 1] = STOP_BYTE;
 
         if (dataSize != 0) {
-            ByteUtils.intToBytes(result, frameSize, 2);
+            ByteUtils.intToBytes(result, dataSize, 2);
             System.arraycopy(data, 0, result, 6, dataSize);
         }
 
