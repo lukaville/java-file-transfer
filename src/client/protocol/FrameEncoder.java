@@ -53,9 +53,9 @@ public class FrameEncoder {
     
     public static Frame encodeFilePart(byte[] block, int blockNumber) {
         byte[] encodedBlock = HammingUtils.cycleEncode(block);
-        byte[] frameData = new byte[block.length + 4];
+        byte[] frameData = new byte[encodedBlock.length + 4];
         ByteUtils.intToBytes(frameData, blockNumber, 0);
-        System.arraycopy(encodedBlock, 0, frameData, 5, encodedBlock.length);
+        System.arraycopy(encodedBlock, 0, frameData, 4, encodedBlock.length);
         return new Frame(Frame.TYPE_FILE_DATA, frameData);
     }
 
