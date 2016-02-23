@@ -147,15 +147,18 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
             return;
         }
 
+        byte[] blockData = new byte[currentWriteBlockSize];
+        System.arraycopy(data, 0, blockData, 0, currentWriteBlockSize);
+
         if ((blockNumber + 1) * currentWriteBlockSize > currentWriteFileLength) {
             int trailingDataLength = currentWriteFileLength - currentWriteBlockSize * blockNumber;
             byte[] truncatedData = new byte[trailingDataLength];
-            System.arraycopy(data, 0, truncatedData, 0, trailingDataLength);
-            data = truncatedData;
+            System.arraycopy(blockData, 0, truncatedData, 0, trailingDataLength);
+            blockData = truncatedData;
         }
 
         try {
-            Files.write(currentWriteFile, data, FILE_WRITE_OPTIONS);
+            Files.write(currentWriteFile, blockData, FILE_WRITE_OPTIONS);
         } catch (IOException e) {
             e.printStackTrace();
         }
