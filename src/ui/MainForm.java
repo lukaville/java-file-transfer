@@ -112,6 +112,12 @@ public class MainForm {
         progressBar.setMaximum(max);
     }
 
+    public void clear() {
+        fileListModel.clear();
+        pathTextField.setText(".");
+        setFileTransferProgress(0, 0);
+    }
+
     public interface OnFileSaveDialogListener {
         void onFileSave(String localPath);
     }

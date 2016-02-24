@@ -31,8 +31,12 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     public static final byte STATUS_UNKNOWN_ERROR = (byte) 0xFF;
 
     private ClientCallbacks callbacks = this;
-    private DataLink connection;
+    private final DataLink dataLink;
     private FileTransferClientListener listener;
+
+    public static final int HEARTBEAT_PERIOD = 5000;
+    private Thread connectionHeartBeat;
+    private long lastFrame;
 
     // Current file for write
     private int currentWriteFileLength;
@@ -49,8 +53,8 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     private int currentReadFileLength;
 
     public FileTransferClient(NetworkConnection connection, FileTransferClientListener listener) {
-        this.connection = new DataLink(connection, this);
-        this.connection.start();
+        this.dataLink = new DataLink(connection, this);
+        this.dataLink.start();
         this.listener = listener;
     }
 
@@ -60,28 +64,50 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     }
 
     public void requestList(String path) {
-        connection.sendFrame(new Frame(Frame.TYPE_GET_LIST_DIRECTORY,
+        dataLink.sendFrame(new Frame(Frame.TYPE_GET_LIST_DIRECTORY,
                 path.getBytes()));
     }
 
     public void connect() {
-        connection.sendFrame(new Frame(Frame.TYPE_CONNECT));
+        lastFrame = System.currentTimeMillis();
+
+        connectionHeartBeat = new Thread(() -> {
+            while (!Thread.interrupted()) {
+                if (System.currentTimeMillis() - lastFrame > HEARTBEAT_PERIOD * 2) {
+                    disconnect();
+                    break;
+                }
+
+                dataLink.sendFrame(Frame.FRAME_CONNECT);
+                try { Thread.sleep(HEARTBEAT_PERIOD); } catch (InterruptedException ignored) {}
+            }
+        });
+
+        connectionHeartBeat.start();
+    }
+
+    public void disconnect() {
+        connectionHeartBeat.interrupt();
+        dataLink.disconnect();
+        onDisconnect();
     }
 
     public void requestFile(String remotePath, String localPath) {
         currentWriteFile = Paths.get(localPath);
-        connection.sendFrame(FrameEncoder.encodeGetFile(remotePath));
+        dataLink.sendFrame(FrameEncoder.encodeGetFile(remotePath));
     }
 
     @Override
     public void onFrameReceived(Frame frame) {
         System.out.println("\n\nFRAME RECEIVED\n" + frame.toString());
         FrameDecoder.parseFrame(frame, callbacks);
+        lastFrame = System.currentTimeMillis();
     }
 
     @Override
     public void onConnect() {
         listener.onConnect();
+        lastFrame = System.currentTimeMillis();
     }
 
     @Override
@@ -94,12 +120,12 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         File[] listOfFiles = directory.listFiles();
 
         if (listOfFiles == null) {
-            connection.sendFrame(FrameEncoder.encodeFileList(STATUS_DIRECTORY_NOT_EXIST, null, path));
+            dataLink.sendFrame(FrameEncoder.encodeFileList(STATUS_DIRECTORY_NOT_EXIST, null, path));
         } else {
             for (File file : listOfFiles) {
                 fileItems.add(new FileItem(file));
             }
-            connection.sendFrame(FrameEncoder.encodeFileList(STATUS_OK, fileItems, path));
+            dataLink.sendFrame(FrameEncoder.encodeFileList(STATUS_OK, fileItems, path));
         }
     }
 
@@ -113,12 +139,12 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         File file = new File(localPath);
 
         if (!file.isFile()) {
-            connection.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_FILE_IS_NOT_FILE, 0, 0));
+            dataLink.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_FILE_IS_NOT_FILE, 0, 0));
             return;
         }
 
         if (file.length() > Integer.MAX_VALUE) {
-            connection.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_VERY_BIG_FILE, 0, 0));
+            dataLink.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_VERY_BIG_FILE, 0, 0));
             return;
         }
 
@@ -136,7 +162,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
             e.printStackTrace();
         }
 
-        connection.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_OK, fileLength, blockSize));
+        dataLink.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_OK, fileLength, blockSize));
     }
 
     @Override
@@ -149,7 +175,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         currentWriteFileLength = lengthBytes;
         currentWriteBlockSize = blockSize;
 
-        connection.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
+        dataLink.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
 
         listener.onStartFileTransfer();
     }
@@ -157,7 +183,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     @Override
     public void onFileBlock(int blockNumber, byte[] data) {
         if (data == null) {
-            connection.sendFrame(new Frame(Frame.TYPE_FILE_DATA_RETRY));
+            dataLink.sendFrame(new Frame(Frame.TYPE_FILE_DATA_RETRY));
             return;
         }
 
@@ -177,7 +203,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
             e.printStackTrace();
         }
 
-        connection.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
+        dataLink.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
 
         listener.onProgressFileTransfer(blockNumber * currentWriteBlockSize, currentWriteFileLength);
     }
@@ -185,7 +211,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     @Override
     public void onFileBlockReceiveSuccess() {
         if (isEndFile) {
-            connection.sendFrame(new Frame(Frame.TYPE_GET_FILE_END));
+            dataLink.sendFrame(new Frame(Frame.TYPE_GET_FILE_END));
             listener.onEndFileTransfer();
             return;
         }
@@ -197,7 +223,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
                 currentReadFileBuffer[currentByteIndex++] = (byte) currentByte;
             }
 
-            connection.sendFrame(FrameEncoder.encodeFilePart(currentReadFileBuffer, currentReadFileBlock));
+            dataLink.sendFrame(FrameEncoder.encodeFilePart(currentReadFileBuffer, currentReadFileBlock));
             currentReadFileBlock++;
 
             // End file

@@ -32,7 +32,7 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onDisconnectButton() {
-
+        client.disconnect();
     }
 
     @Override
@@ -82,6 +82,7 @@ public class Application implements UiListener, FileTransferClientListener {
     @Override
     public void onDisconnect() {
         mainForm.setStatus(false);
+        mainForm.clear();
     }
 
     @Override

@@ -107,7 +107,7 @@ public class DataLink extends Thread {
         }
     }
 
-    public void sendFrame(Frame frame) {
+    public synchronized void sendFrame(Frame frame) {
         System.out.println("\n\nFRAME SENT\n" + frame.toString());
 
         try {

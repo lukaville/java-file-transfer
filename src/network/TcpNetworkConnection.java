@@ -2,6 +2,7 @@ package network;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -16,7 +17,7 @@ public class TcpNetworkConnection extends NetworkConnection {
     }
 
     public TcpNetworkConnection(int serverPort) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(serverPort);
+        ServerSocket serverSocket = new ServerSocket(serverPort, 1024, InetAddress.getByName("0.0.0.0"));
         socket = serverSocket.accept();
     }
 

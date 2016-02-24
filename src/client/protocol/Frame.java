@@ -24,6 +24,8 @@ public class Frame {
     public static final byte TYPE_GET_FILE_END = (byte) 0x0A;
     public static final byte TYPE_DISCONNECT = (byte) 0x0B;
 
+    public static final Frame FRAME_CONNECT = new Frame(TYPE_CONNECT);
+
     private static final String[] FRAME_TYPE_DESCRIPTIONS = {
             "connect",
             "set_speed",
