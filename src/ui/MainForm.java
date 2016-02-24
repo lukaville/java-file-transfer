@@ -28,6 +28,7 @@ public class MainForm {
     private JTextField pathTextField;
     private JButton getListButton;
     private JLabel statusLabel;
+    private JProgressBar progressBar;
     private final UiListener uiListener;
 
     private final DefaultListModel<FileItem> fileListModel;
@@ -74,7 +75,7 @@ public class MainForm {
         frame.setContentPane(panel);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
-        frame.setSize(400, 400);
+        frame.setSize(600, 400);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
@@ -100,6 +101,15 @@ public class MainForm {
             File file = fc.getSelectedFile();
             listener.onFileSave(file.getAbsolutePath());
         }
+    }
+
+    public void clearProgress() {
+        progressBar.setValue(0);
+    }
+
+    public void setFileTransferProgress(int current, int max) {
+        progressBar.setValue(current);
+        progressBar.setMaximum(max);
     }
 
     public interface OnFileSaveDialogListener {

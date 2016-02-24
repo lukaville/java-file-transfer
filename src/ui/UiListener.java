@@ -8,4 +8,5 @@ public interface UiListener {
     void onConnectButton(CommPortIdentifier port, int baudRate, int dataBits, int stopBits, int parity);
     void onGetListButton(String path);
     void onFileItemClick(FileItem fileItem, String path);
+    void onFileTransferCancel();
 }

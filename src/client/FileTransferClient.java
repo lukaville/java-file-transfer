@@ -40,6 +40,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     private int currentReadFileBlock;
     private int currentReadBlockSize;
     private boolean isEndFile = false;
+    private int currentReadFileLength;
 
     public FileTransferClient(NetworkConnection connection, FileTransferClientListener listener) {
         this.connection = new DataLink(connection, this);
@@ -114,6 +115,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         int fileLength = (int) file.length();
         int blockSize = DEFAULT_BLOCK_SIZE;
         currentReadBlockSize = blockSize;
+        currentReadFileLength = fileLength;
         isEndFile = false;
 
         try {
@@ -138,6 +140,8 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         currentWriteBlockSize = blockSize;
 
         connection.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
+
+        listener.onStartFileTransfer();
     }
 
     @Override
@@ -164,12 +168,15 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         }
 
         connection.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
+
+        listener.onProgressFileTransfer(blockNumber * currentWriteBlockSize, currentWriteFileLength);
     }
 
     @Override
     public void onFileBlockReceiveSuccess() {
         if (isEndFile) {
             connection.sendFrame(new Frame(Frame.TYPE_GET_FILE_END));
+            listener.onEndFileTransfer();
             return;
         }
 
@@ -190,6 +197,8 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        listener.onProgressFileTransfer(currentReadFileBlock * currentReadBlockSize, currentReadFileLength);
     }
 
     @Override
@@ -199,12 +208,12 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onFileCancel() {
-
+        listener.onEndFileTransfer();
     }
 
     @Override
     public void onFileReceived() {
-
+        listener.onEndFileTransfer();
     }
 
     @Override

@@ -10,6 +10,9 @@ import java.util.List;
 public interface FileTransferClientListener {
     void onList(List<FileItem> files, String path);
     void onFileError(int status);
+    void onStartFileTransfer();
+    void onProgressFileTransfer(int current, int max);
+    void onEndFileTransfer();
     void onConnect();
     void onDisconnect();
 }

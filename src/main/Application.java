@@ -44,6 +44,21 @@ public class Application implements UiListener, FileTransferClientListener {
     }
 
     @Override
+    public void onStartFileTransfer() {
+        mainForm.clearProgress();
+    }
+
+    @Override
+    public void onProgressFileTransfer(int current, int max) {
+        mainForm.setFileTransferProgress(current, max);
+    }
+
+    @Override
+    public void onEndFileTransfer() {
+        mainForm.clearProgress();
+    }
+
+    @Override
     public void onConnect() {
         mainForm.setStatus(true);
     }
@@ -77,6 +92,11 @@ public class Application implements UiListener, FileTransferClientListener {
                 client.requestFile(newRemotePath, localPath);
             });
         }
+    }
+
+    @Override
+    public void onFileTransferCancel() {
+
     }
 
     private NetworkConnection connect(boolean isServer) {
