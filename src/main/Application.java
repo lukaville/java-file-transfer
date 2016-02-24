@@ -9,6 +9,8 @@ import network.TcpNetworkConnection;
 import ui.MainForm;
 import ui.UiListener;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -40,6 +42,20 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onFileError(int status) {
+        String msg;
+        switch (status) {
+            case FileTransferClient.STATUS_FILE_IS_NOT_FILE:
+                msg = "Requested file is not file";
+                break;
+            case FileTransferClient.STATUS_VERY_BIG_FILE:
+                msg = "This file size doesn't supported";
+                break;
+            default:
+                msg = "Can't download file";
+        }
+
+        JOptionPane.showMessageDialog(new Frame(), msg, "Error", JOptionPane.ERROR_MESSAGE);
+
         System.out.println("Can't download file: error #" + status);
     }
 

@@ -24,6 +24,12 @@ import static java.nio.file.StandardOpenOption.CREATE;
 public class FileTransferClient implements FrameListener, ClientCallbacks {
     public static final int DEFAULT_BLOCK_SIZE = 1024;
 
+    public static final byte STATUS_OK = (byte) 0x00;
+    public static final byte STATUS_DIRECTORY_NOT_EXIST = (byte) 0x01;
+    public static final byte STATUS_FILE_IS_NOT_FILE = (byte) 0x02;
+    public static final byte STATUS_VERY_BIG_FILE = (byte) 0x03;
+    public static final byte STATUS_UNKNOWN_ERROR = (byte) 0xFF;
+
     private ClientCallbacks callbacks = this;
     private DataLink connection;
     private FileTransferClientListener listener;
@@ -88,12 +94,12 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         File[] listOfFiles = directory.listFiles();
 
         if (listOfFiles == null) {
-            connection.sendFrame(FrameEncoder.encodeFileList(0x01, null, path));
+            connection.sendFrame(FrameEncoder.encodeFileList(STATUS_DIRECTORY_NOT_EXIST, null, path));
         } else {
             for (File file : listOfFiles) {
                 fileItems.add(new FileItem(file));
             }
-            connection.sendFrame(FrameEncoder.encodeFileList(0x00, fileItems, path));
+            connection.sendFrame(FrameEncoder.encodeFileList(STATUS_OK, fileItems, path));
         }
     }
 
@@ -107,11 +113,15 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         File file = new File(localPath);
 
         if (!file.isFile()) {
-            connection.sendFrame(FrameEncoder.encodeGetFileResponse(0x01, 0, 0));
+            connection.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_FILE_IS_NOT_FILE, 0, 0));
             return;
         }
 
-        // TODO: file length int bytes must be < MAX_INT
+        if (file.length() > Integer.MAX_VALUE) {
+            connection.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_VERY_BIG_FILE, 0, 0));
+            return;
+        }
+
         int fileLength = (int) file.length();
         int blockSize = DEFAULT_BLOCK_SIZE;
         currentReadBlockSize = blockSize;
@@ -126,12 +136,12 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
             e.printStackTrace();
         }
 
-        connection.sendFrame(FrameEncoder.encodeGetFileResponse(0x00, fileLength, blockSize));
+        connection.sendFrame(FrameEncoder.encodeGetFileResponse(STATUS_OK, fileLength, blockSize));
     }
 
     @Override
     public void onFile(int status, int lengthBytes, int blockSize) {
-        if (status != 0x00) {
+        if (status != STATUS_OK) {
             listener.onFileError(status);
             return;
         }

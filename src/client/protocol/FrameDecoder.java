@@ -1,6 +1,7 @@
 package client.protocol;
 
 import client.ClientCallbacks;
+import client.FileTransferClient;
 import client.model.FileItem;
 import util.ByteUtils;
 import util.HammingUtils;
@@ -80,7 +81,7 @@ public class FrameDecoder {
             }
         }
 
-        if (status != 0x00) {
+        if (status != FileTransferClient.STATUS_OK) {
             listener.onList(files, path);
         }
 
