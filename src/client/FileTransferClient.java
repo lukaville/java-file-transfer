@@ -40,6 +40,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     private long lastFrame;
 
     // Current file for write
+    private long lastFileBlockFrame;
     private int currentWriteFileLength;
     private int currentWriteBlockSize;
     private Path currentWriteFile;
@@ -72,6 +73,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     public void connect() {
         lastFrame = System.currentTimeMillis();
+        lastFileBlockFrame = -1;
 
         connectionHeartBeat = new Thread(() -> {
             while (!Thread.interrupted()) {
@@ -81,6 +83,13 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
                 }
 
                 dataLink.sendFrame(Frame.FRAME_CONNECT);
+
+                if (lastFileBlockFrame > 0) {
+                    if (System.currentTimeMillis() - lastFileBlockFrame > HEARTBEAT_PERIOD) {
+                        dataLink.sendFrame(Frame.FRAME_FILE_DATA_RETRY);
+                    }
+                }
+
                 try { Thread.sleep(HEARTBEAT_PERIOD); } catch (InterruptedException ignored) {}
             }
         });
@@ -179,7 +188,9 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         currentWriteFileLength = lengthBytes;
         currentWriteBlockSize = blockSize;
 
-        dataLink.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
+        lastFileBlockFrame = System.currentTimeMillis();
+
+        dataLink.sendFrame(Frame.FRAME_FILE_DATA_SUCCESS);
 
         listener.onStartFileTransfer();
     }
@@ -187,7 +198,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     @Override
     public void onFileBlock(int blockNumber, byte[] data) {
         if (data == null) {
-            dataLink.sendFrame(new Frame(Frame.TYPE_FILE_DATA_RETRY));
+            dataLink.sendFrame(Frame.FRAME_FILE_DATA_RETRY);
             return;
         }
 
@@ -207,7 +218,9 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
             e.printStackTrace();
         }
 
-        dataLink.sendFrame(new Frame(Frame.TYPE_FILE_DATA_SUCCESS));
+        lastFileBlockFrame = System.currentTimeMillis();
+
+        dataLink.sendFrame(Frame.FRAME_FILE_DATA_SUCCESS);
 
         listener.onProgressFileTransfer(blockNumber * currentWriteBlockSize, currentWriteFileLength);
     }
@@ -278,11 +291,13 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     @Override
     public void onFileCancel() {
         listener.onEndFileTransfer();
+        lastFileBlockFrame = -1;
     }
 
     @Override
     public void onFileReceived() {
         listener.onEndFileTransfer();
+        lastFileBlockFrame = -1;
     }
 
     @Override

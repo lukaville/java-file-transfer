@@ -2,8 +2,6 @@ package client.protocol;
 
 import util.ByteUtils;
 
-import java.util.Arrays;
-
 /**
  * Created by nickolay on 11.02.16.
  */
@@ -25,6 +23,8 @@ public class Frame {
     public static final byte TYPE_DISCONNECT = (byte) 0x0B;
 
     public static final Frame FRAME_CONNECT = new Frame(TYPE_CONNECT);
+    public static final Frame FRAME_FILE_DATA_RETRY = new Frame(TYPE_FILE_DATA_RETRY);
+    public static final Frame FRAME_FILE_DATA_SUCCESS = new Frame(TYPE_FILE_DATA_SUCCESS);
 
     private static final String[] FRAME_TYPE_DESCRIPTIONS = {
             "connect",
