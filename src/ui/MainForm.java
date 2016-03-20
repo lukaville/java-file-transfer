@@ -81,7 +81,9 @@ public class MainForm {
     }
 
     public void updateFileList(List<FileItem> files, String path) {
-        pathTextField.setText(path);
+        if (path != null) {
+            pathTextField.setText(path);
+        }
         Collections.sort(files);
         files.add(0, new FileItem("..", true));
         fileListModel.removeAllElements();

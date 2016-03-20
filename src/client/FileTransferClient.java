@@ -119,6 +119,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         path = Paths.get(path).toAbsolutePath().normalize().toString();
 
         File directory = new File(path);
+
         File[] listOfFiles = directory.listFiles();
 
         if (listOfFiles == null) {
@@ -287,5 +288,10 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     @Override
     public void onDisconnect() {
         listener.onDisconnect();
+    }
+
+    @Override
+    public void onError(String description) {
+        listener.onError(description);
     }
 }

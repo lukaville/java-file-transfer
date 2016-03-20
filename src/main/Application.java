@@ -54,8 +54,7 @@ public class Application implements UiListener, FileTransferClientListener {
                 msg = "Can't download file";
         }
 
-        JOptionPane.showMessageDialog(new Frame(), msg, "Error", JOptionPane.ERROR_MESSAGE);
-
+        onError(msg);
         System.out.println("Can't download file: error #" + status);
     }
 
@@ -67,6 +66,11 @@ public class Application implements UiListener, FileTransferClientListener {
     @Override
     public void onProgressFileTransfer(int current, int max) {
         mainForm.setFileTransferProgress(current, max);
+    }
+
+    @Override
+    public void onError(String description) {
+        JOptionPane.showMessageDialog(new Frame(), description, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override

@@ -19,4 +19,5 @@ public interface ClientCallbacks {
     void onFileCancel();
     void onFileReceived();
     void onDisconnect();
+    void onError(String description);
 }

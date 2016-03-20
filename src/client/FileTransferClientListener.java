@@ -12,6 +12,7 @@ public interface FileTransferClientListener {
     void onFileError(int status);
     void onStartFileTransfer();
     void onProgressFileTransfer(int current, int max);
+    void onError(String description);
     void onEndFileTransfer();
     void onConnect();
     void onDisconnect();

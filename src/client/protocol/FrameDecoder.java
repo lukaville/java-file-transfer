@@ -73,16 +73,20 @@ public class FrameDecoder {
         String path = "";
         byte status = frameData[0];
 
+        if (status != FileTransferClient.STATUS_OK) {
+            listener.onList(files, null);
+            if (status == FileTransferClient.STATUS_DIRECTORY_NOT_EXIST) {
+                listener.onError("Директория не существует");
+            }
+            return;
+        }
+
         int i = 1;
         for (; i < 8192; ++i) {
             if (frameData[i] == 0x00 && frameData[i - 1] == 0x00) {
                 path = new String(frameData, 1, i - 2, StandardCharsets.UTF_8);
                 break;
             }
-        }
-
-        if (status != FileTransferClient.STATUS_OK) {
-            listener.onList(files, path);
         }
 
         boolean isName = false;
