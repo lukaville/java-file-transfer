@@ -1,5 +1,6 @@
 package client.protocol;
 
+import client.FileTransferClient;
 import client.model.FileItem;
 import util.ByteUtils;
 import util.HammingUtils;
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public class FrameEncoder {
     public static Frame encodeFileList(int status, List<FileItem> files, String path) {
-        if (status != 0x00) {
+        if (status != FileTransferClient.STATUS_OK) {
             return new Frame(Frame.TYPE_LIST_DIRECTORY, new byte[] {(byte) status});
         }
 
@@ -23,7 +24,7 @@ public class FrameEncoder {
             frameDataLength += file.getName().getBytes(StandardCharsets.UTF_8).length + 3;
         }
         byte[] frameData = new byte[frameDataLength];
-        frameData[0] = (byte) 0x00; // status
+        frameData[0] = FileTransferClient.STATUS_OK;
 
         int currentIndex = 1;
         currentIndex += writeString(frameData, path, currentIndex);

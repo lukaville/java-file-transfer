@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -50,6 +51,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     private int currentReadFileBlock;
     private int currentReadBlockSize;
     private boolean isEndFile = false;
+    private boolean wasEndFileFrameSend = false;
     private int currentReadFileLength;
 
     public FileTransferClient(NetworkConnection connection, FileTransferClientListener listener) {
@@ -153,6 +155,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         currentReadBlockSize = blockSize;
         currentReadFileLength = fileLength;
         isEndFile = false;
+        wasEndFileFrameSend = false;
 
         try {
             currentReadFileStream = new FileInputStream(localPath);
@@ -212,6 +215,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     public void onFileBlockReceiveSuccess() {
         if (isEndFile) {
             dataLink.sendFrame(new Frame(Frame.TYPE_GET_FILE_END));
+            wasEndFileFrameSend = true;
             listener.onEndFileTransfer();
             return;
         }
@@ -239,7 +243,35 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
 
     @Override
     public void onFileBlockReceiveFail() {
+        if (wasEndFileFrameSend) {
+            dataLink.sendFrame(new Frame(Frame.TYPE_GET_FILE_END));
+            return;
+        }
 
+        try {
+            int currentByte = -1;
+            int currentByteIndex = 0;
+            --currentReadFileBlock;
+            isEndFile = false;
+
+            long lastFilePosition = currentReadBlockSize * currentReadFileBlock;
+            FileChannel fileChannel = currentReadFileStream.getChannel();
+            fileChannel.position(lastFilePosition);
+
+            while(currentByteIndex < currentReadBlockSize && (currentByte = currentReadFileStream.read()) != -1) {
+                currentReadFileBuffer[currentByteIndex++] = (byte) currentByte;
+            }
+
+            dataLink.sendFrame(FrameEncoder.encodeFilePart(currentReadFileBuffer, currentReadFileBlock));
+            currentReadFileBlock++;
+
+            // End file
+            if (currentByte == -1) {
+                isEndFile = true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
