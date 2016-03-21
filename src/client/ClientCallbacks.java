@@ -9,6 +9,7 @@ import java.util.List;
  */
 public interface ClientCallbacks {
     void onConnect();
+    void onSetSerialPort(int baudRate, int dataBits, int stopBits, int parity);
     void onGetList(String path);
     void onList(List<FileItem> files, String path);
     void onGetFile(String path);

@@ -20,6 +20,13 @@ public class FrameDecoder {
             case Frame.TYPE_CONNECT:
                 listener.onConnect();
                 return;
+            case Frame.TYPE_SET_SPEED:
+                int baudRate = ByteUtils.bytesToInt(frame.getData(), 0);
+                int dataBits = frame.getData()[4]&0xC0 + 5;
+                int stopBits = frame.getData()[4]&0x30;
+                int parity = frame.getData()[4]&0x0F;
+                listener.onSetSerialPort(baudRate, dataBits, stopBits, parity);
+                return;
             case Frame.TYPE_GET_LIST_DIRECTORY:
                 String directory = new String(frame.getData(), StandardCharsets.UTF_8);
                 System.out.println("Directory: " + directory);

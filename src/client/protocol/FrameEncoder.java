@@ -14,7 +14,7 @@ import java.util.List;
 public class FrameEncoder {
     public static Frame encodeFileList(int status, List<FileItem> files, String path) {
         if (status != FileTransferClient.STATUS_OK) {
-            return new Frame(Frame.TYPE_LIST_DIRECTORY, new byte[] {(byte) status});
+            return new Frame(Frame.TYPE_LIST_DIRECTORY, new byte[]{(byte) status});
         }
 
         // TODO: optimize array allocation
@@ -29,7 +29,7 @@ public class FrameEncoder {
         int currentIndex = 1;
         currentIndex += writeString(frameData, path, currentIndex);
 
-        for(FileItem file : files) {
+        for (FileItem file : files) {
             frameData[currentIndex] = (byte) (file.isDirectory() ? 0x01 : 0x00); // flags
             currentIndex++;
             currentIndex += writeString(frameData, file.getName(), currentIndex);
@@ -51,13 +51,20 @@ public class FrameEncoder {
 
         return new Frame(Frame.TYPE_GET_FILE_RESPONSE, frameData);
     }
-    
+
     public static Frame encodeFilePart(byte[] block, int blockNumber) {
         byte[] encodedBlock = HammingUtils.cycleEncode(block);
         byte[] frameData = new byte[encodedBlock.length + 4];
         ByteUtils.intToBytes(frameData, blockNumber, 0);
         System.arraycopy(encodedBlock, 0, frameData, 4, encodedBlock.length);
         return new Frame(Frame.TYPE_FILE_DATA, frameData);
+    }
+
+    public static Frame encodeSerialPortSettings(int baudRate, int dataBits, int stopBits, int parity) {
+        byte[] frameData = new byte[5];
+        ByteUtils.intToBytes(frameData, baudRate, 0);
+        frameData[4] = (byte) ((dataBits - 5 << 6) | (stopBits << 4) | parity);
+        return new Frame(Frame.TYPE_SET_SPEED, frameData);
     }
 
     private static int writeString(byte[] arr, String str, int offset) {

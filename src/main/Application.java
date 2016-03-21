@@ -4,15 +4,16 @@ import client.FileTransferClient;
 import client.FileTransferClientListener;
 import client.model.FileItem;
 import gnu.io.CommPortIdentifier;
+import gnu.io.PortInUseException;
+import gnu.io.UnsupportedCommOperationException;
 import network.NetworkConnection;
-import network.TcpNetworkConnection;
+import network.SerialNetworkConnection;
 import ui.MainForm;
 import ui.UiListener;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -32,7 +33,9 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onDisconnectButton() {
-        client.disconnect();
+        if (client != null) {
+            client.disconnect();
+        }
     }
 
     @Override
@@ -90,16 +93,38 @@ public class Application implements UiListener, FileTransferClientListener {
     }
 
     @Override
+    public void onSetSerialPort(int baudRate, int dataBits, int stopBits, int parity) {
+        // TODO: 21.03.16
+    }
+
+    @Override
     public void onConnectButton(CommPortIdentifier port, int baudRate, int dataBits, int stopBits, int parity) {
-        // TODO: serial port
-        NetworkConnection connection = connect(baudRate == 0);
-        client = new FileTransferClient(connection, this);
-        client.connect();
+        // TODO: send typeSetSpeed frame with parameters
+        try {
+            NetworkConnection connection = new SerialNetworkConnection(port, 3000, baudRate, dataBits, stopBits, parity);
+            client = new FileTransferClient(connection, this);
+            client.connect();
+        } catch (PortInUseException | UnsupportedCommOperationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onConnectButton(CommPortIdentifier port) {
+        try {
+            NetworkConnection connection = new SerialNetworkConnection(port, 3000, 50, 8, 1, 0);
+            client = new FileTransferClient(connection, this);
+            client.connect();
+        } catch (PortInUseException | UnsupportedCommOperationException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onGetListButton(String path) {
-        client.requestList(path);
+        if (client != null) {
+            client.requestList(path);
+        }
     }
 
     @Override
@@ -118,22 +143,5 @@ public class Application implements UiListener, FileTransferClientListener {
     @Override
     public void onFileTransferCancel() {
 
-    }
-
-    private NetworkConnection connect(boolean isServer) {
-        try {
-            NetworkConnection connection;
-            if (isServer) {
-                connection = new TcpNetworkConnection(3333);
-            } else {
-                connection = new TcpNetworkConnection("127.0.0.1", 3333);
-            }
-
-            return connection;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

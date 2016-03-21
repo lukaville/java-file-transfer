@@ -1,12 +1,12 @@
 package ui;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
 import util.SerialUtils;
 
 import javax.swing.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
 public class ConnectDialog extends JDialog {
     public static final String PARITY_NONE = "отсутствует";
@@ -27,12 +27,17 @@ public class ConnectDialog extends JDialog {
     private JComboBox<String> stopBits;
     private JComboBox<String> parity;
     private JComboBox<String> comPort;
+    private JCheckBox waitConnectCheckBox;
     private UiListener uiListener;
+
+    boolean waitConnect = false;
 
     public ConnectDialog(UiListener uiListener) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonConnect);
+
+        waitConnectCheckBox.addItemListener(e -> onWaitConnect(e.getStateChange() == ItemEvent.SELECTED));
 
         buttonConnect.addActionListener(e -> onConnect());
         buttonCancel.addActionListener(e -> onCancel());
@@ -57,7 +62,7 @@ public class ConnectDialog extends JDialog {
 
     private void updateComPortList() {
         comPort.removeAllItems();
-        for(String port : SerialUtils.getAvailablePorts()) {
+        for (String port : SerialUtils.getAvailablePorts()) {
             comPort.addItem(port);
         }
     }
@@ -99,13 +104,79 @@ public class ConnectDialog extends JDialog {
         parity.addItem(PARITY_SPACE);
     }
 
+    private void onWaitConnect(boolean selected) {
+        if (selected) {
+            baudRate.setEnabled(false);
+            dataBits.setEnabled(false);
+            stopBits.setEnabled(false);
+            parity.setEnabled(false);
+        } else {
+            baudRate.setEnabled(true);
+            dataBits.setEnabled(true);
+            stopBits.setEnabled(true);
+            parity.setEnabled(true);
+        }
+
+        waitConnect = selected;
+    }
+
     private void onConnect() {
-        uiListener.onConnectButton(null, 1, 0, 0, 0);
-        dispose();
+        if (waitConnect) {
+            try {
+                uiListener.onConnectButton(
+                        CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem())
+                );
+                dispose();
+            } catch (NoSuchPortException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                uiListener.onConnectButton(
+                        CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()),
+                        (Integer) baudRate.getSelectedItem(),
+                        (Integer) dataBits.getSelectedItem(),
+                        getStopBits((String) stopBits.getSelectedItem()),
+                        getParity((String) parity.getSelectedItem())
+                );
+                dispose();
+            } catch (NoSuchPortException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void onCancel() {
-        uiListener.onConnectButton(null, 0, 0, 0, 0);
         dispose();
+    }
+
+    private int getStopBits(String stopBits) {
+        switch (stopBits) {
+            case STOP_BITS_1:
+                return SerialPort.STOPBITS_1;
+            case STOP_BITS_1_5:
+                return SerialPort.STOPBITS_1_5;
+            case STOP_BITS_2:
+                return SerialPort.STOPBITS_2;
+            default:
+                return 0;
+        }
+    }
+
+    private int getParity(String parity) {
+        switch (parity) {
+            case PARITY_EVEN:
+                return SerialPort.PARITY_EVEN;
+            case PARITY_MARK:
+                return SerialPort.PARITY_MARK;
+            case PARITY_NONE:
+                return SerialPort.PARITY_NONE;
+            case PARITY_ODD:
+                return SerialPort.PARITY_ODD;
+            case PARITY_SPACE:
+                return SerialPort.PARITY_SPACE;
+            default:
+                return 0;
+        }
     }
 }

@@ -16,4 +16,5 @@ public interface FileTransferClientListener {
     void onEndFileTransfer();
     void onConnect();
     void onDisconnect();
+    void onSetSerialPort(int baudRate, int dataBits, int stopBits, int parity);
 }
