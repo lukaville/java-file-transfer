@@ -22,9 +22,9 @@ public class FrameDecoder {
                 return;
             case Frame.TYPE_SET_SPEED:
                 int baudRate = ByteUtils.bytesToInt(frame.getData(), 0);
-                int dataBits = frame.getData()[4]&0xC0 + 5;
-                int stopBits = frame.getData()[4]&0x30;
-                int parity = frame.getData()[4]&0x0F;
+                int dataBits = ((frame.getData()[4] & 0b11000000) >> 6) + 5;
+                int stopBits = (frame.getData()[4] & 0b00110000) >> 4;
+                int parity = frame.getData()[4] & 0b00001111;
                 listener.onSetSerialPort(baudRate, dataBits, stopBits, parity);
                 return;
             case Frame.TYPE_GET_LIST_DIRECTORY:
