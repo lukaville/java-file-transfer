@@ -1,6 +1,7 @@
 package ui;
 
 import client.model.FileItem;
+import main.Application;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,21 +32,21 @@ public class MainForm {
     private JLabel statusLabel;
     private JProgressBar progressBar;
     private JButton waitConnectButton;
-    private final UiListener uiListener;
+    private final Application application;
 
     PortParamWaitingDialog portParamWaitingDialog;
 
     private final DefaultListModel<FileItem> fileListModel;
 
-    public MainForm(UiListener uiListener) {
-        this.uiListener = uiListener;
+    public MainForm(Application application) {
+        this.application = application;
 
         fileList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 JList list = (JList) evt.getSource();
                 if (evt.getClickCount() == 2) {
                     int index = list.locationToIndex(evt.getPoint());
-                    uiListener.onFileItemClick(fileListModel.get(index), pathTextField.getText());
+                    application.onFileItemClick(fileListModel.get(index), pathTextField.getText());
                 }
             }
         });
@@ -63,20 +64,20 @@ public class MainForm {
 
         connectButton.addActionListener(e -> openConnectDialog());
         waitConnectButton.addActionListener(e -> openPortParamWaitingDialog());
-        disconnectButton.addActionListener(e -> uiListener.onDisconnectButton());
-        getListButton.addActionListener(e -> uiListener.onGetListButton(pathTextField.getText()));
+        disconnectButton.addActionListener(e -> application.onDisconnectButton());
+        getListButton.addActionListener(e -> application.onGetListButton(pathTextField.getText()));
 
         statusLabel.setIcon(warningIcon);
     }
 
     private void openPortParamWaitingDialog() {
-        portParamWaitingDialog = new PortParamWaitingDialog(uiListener);
+        portParamWaitingDialog = new PortParamWaitingDialog(application);
         portParamWaitingDialog.pack();
         portParamWaitingDialog.setVisible(true);
     }
 
     private void openConnectDialog() {
-        ConnectDialog dialog = new ConnectDialog(uiListener);
+        ConnectDialog dialog = new ConnectDialog(application, application.getFileTransferClient());
         dialog.pack();
         dialog.setVisible(true);
     }

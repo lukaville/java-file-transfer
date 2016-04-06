@@ -1,5 +1,6 @@
 package ui;
 
+import client.FileTransferClient;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
@@ -30,7 +31,9 @@ public class ConnectDialog extends JDialog {
     private JButton buttonSendParams;
     private UiListener uiListener;
 
-    public ConnectDialog(UiListener uiListener) {
+    private FileTransferClient transferClient;
+
+    public ConnectDialog(UiListener uiListener, FileTransferClient transferClient) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonConnect);
@@ -55,6 +58,7 @@ public class ConnectDialog extends JDialog {
         setParity();
 
         this.uiListener = uiListener;
+        this.transferClient = transferClient;
     }
 
     private void onSendParams() {
@@ -63,8 +67,15 @@ public class ConnectDialog extends JDialog {
         } catch (NoSuchPortException e) {
             e.printStackTrace();
         }
+        transferClient.sendSerialPortParams(
+                (Integer) baudRate.getSelectedItem(),
+                (Integer) dataBits.getSelectedItem(),
+                getStopBits((String) stopBits.getSelectedItem()),
+                getParity((String) parity.getSelectedItem())
+        );
         uiListener.onDisconnectButton();
         onConnect();
+        dispose();
     }
 
     private void updateComPortList() {

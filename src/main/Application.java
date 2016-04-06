@@ -149,4 +149,8 @@ public class Application implements UiListener, FileTransferClientListener {
     public void onFileTransferCancel() {
 
     }
+
+    public FileTransferClient getFileTransferClient() {
+        return client;
+    }
 }
