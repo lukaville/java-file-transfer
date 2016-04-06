@@ -127,6 +127,7 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     }
 
     public void sendSerialPortParams(int baudRate, int dataBits, int stopBits, int parity) {
+        System.out.printf("Send serial port params: baudRate = %d, dataBits = %d, stopBits = %d, parity = %d%n", baudRate, dataBits, stopBits, parity);
         dataLink.sendFrame(FrameEncoder.encodeSerialPortSettings(baudRate, dataBits, stopBits, parity));
     }
 

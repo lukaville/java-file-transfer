@@ -94,6 +94,8 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onSetSerialPort(int baudRate, int dataBits, int stopBits, int parity) {
+        System.out.printf("Set serial port params: baudRate = %d, dataBits = %d, stopBits = %d, parity = %d%n", baudRate, dataBits, stopBits, parity);
+
         onDisconnectButton();
         if (waitingPort != null) {
             onConnectButton(waitingPort, baudRate, dataBits, stopBits, parity);

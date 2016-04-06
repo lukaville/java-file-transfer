@@ -78,7 +78,7 @@ public class MainForm {
     }
 
     private void openConnectDialog() {
-        ConnectDialog dialog = new ConnectDialog(application, application.getFileTransferClient());
+        ConnectDialog dialog = new ConnectDialog(application);
         dialog.pack();
         dialog.setVisible(true);
     }
@@ -135,7 +135,7 @@ public class MainForm {
 
     public void closePortParamWaitingDialog() {
         if (portParamWaitingDialog != null) {
-            portParamWaitingDialog.dispatchEvent(new WindowEvent(portParamWaitingDialog, WindowEvent.WINDOW_CLOSING));
+            portParamWaitingDialog.dispose();
         }
     }
 

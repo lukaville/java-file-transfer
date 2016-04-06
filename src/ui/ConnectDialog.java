@@ -1,9 +1,9 @@
 package ui;
 
-import client.FileTransferClient;
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
+import main.Application;
 import util.SerialUtils;
 
 import javax.swing.*;
@@ -29,11 +29,9 @@ public class ConnectDialog extends JDialog {
     private JComboBox<String> parity;
     private JComboBox<String> comPort;
     private JButton buttonSendParams;
-    private UiListener uiListener;
+    private Application application;
 
-    private FileTransferClient transferClient;
-
-    public ConnectDialog(UiListener uiListener, FileTransferClient transferClient) {
+    public ConnectDialog(Application application) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonConnect);
@@ -57,25 +55,24 @@ public class ConnectDialog extends JDialog {
         setStopBits();
         setParity();
 
-        this.uiListener = uiListener;
-        this.transferClient = transferClient;
+        this.application = application;
     }
 
     private void onSendParams() {
         try {
-            uiListener.onWaitConnectButton(CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()));
+            application.onWaitConnectButton(CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()));
         } catch (NoSuchPortException e) {
             e.printStackTrace();
         }
-        transferClient.sendSerialPortParams(
+        application.getFileTransferClient().sendSerialPortParams(
                 (Integer) baudRate.getSelectedItem(),
                 (Integer) dataBits.getSelectedItem(),
                 getStopBits((String) stopBits.getSelectedItem()),
                 getParity((String) parity.getSelectedItem())
         );
-        uiListener.onDisconnectButton();
+        application.onDisconnectButton();
         onConnect();
-        dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        dispose();
     }
 
     private void updateComPortList() {
@@ -124,7 +121,7 @@ public class ConnectDialog extends JDialog {
 
     private void onConnect() {
         try {
-            uiListener.onConnectButton(
+            application.onConnectButton(
                     CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()),
                     (Integer) baudRate.getSelectedItem(),
                     (Integer) dataBits.getSelectedItem(),
