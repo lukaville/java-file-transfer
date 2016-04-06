@@ -3,6 +3,7 @@ package ui;
 import client.model.FileItem;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -29,7 +30,10 @@ public class MainForm {
     private JButton getListButton;
     private JLabel statusLabel;
     private JProgressBar progressBar;
+    private JButton waitConnectButton;
     private final UiListener uiListener;
+
+    PortParamWaitingDialog portParamWaitingDialog;
 
     private final DefaultListModel<FileItem> fileListModel;
 
@@ -58,10 +62,17 @@ public class MainForm {
         fileList.setModel(fileListModel);
 
         connectButton.addActionListener(e -> openConnectDialog());
+        waitConnectButton.addActionListener(e -> openPortParamWaitingDialog());
         disconnectButton.addActionListener(e -> uiListener.onDisconnectButton());
         getListButton.addActionListener(e -> uiListener.onGetListButton(pathTextField.getText()));
 
         statusLabel.setIcon(warningIcon);
+    }
+
+    private void openPortParamWaitingDialog() {
+        portParamWaitingDialog = new PortParamWaitingDialog(uiListener);
+        portParamWaitingDialog.pack();
+        portParamWaitingDialog.setVisible(true);
     }
 
     private void openConnectDialog() {
@@ -120,7 +131,21 @@ public class MainForm {
         setFileTransferProgress(0, 0);
     }
 
+    public void closePortParamWaitingDialog() {
+        if (portParamWaitingDialog != null) {
+            portParamWaitingDialog.dispose();
+        }
+    }
+
     public interface OnFileSaveDialogListener {
         void onFileSave(String localPath);
+    }
+
+    public void showAlert(String message, boolean isError) {
+        if (isError) {
+            JOptionPane.showMessageDialog(new Frame(), message, "Ошибка", JOptionPane.ERROR_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(new Frame(), message, "Информация", JOptionPane.INFORMATION_MESSAGE);
+        }
     }
 }

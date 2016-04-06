@@ -126,6 +126,10 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
         listener.onSetSerialPort(baudRate, dataBits, stopBits, parity);
     }
 
+    public void sendSerialPortParams(int baudRate, int dataBits, int stopBits, int parity) {
+        dataLink.sendFrame(FrameEncoder.encodeSerialPortSettings(baudRate, dataBits, stopBits, parity));
+    }
+
     @Override
     public void onGetList(String path) {
         List<FileItem> fileItems = new ArrayList<>();

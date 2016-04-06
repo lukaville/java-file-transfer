@@ -27,19 +27,16 @@ public class ConnectDialog extends JDialog {
     private JComboBox<String> stopBits;
     private JComboBox<String> parity;
     private JComboBox<String> comPort;
-    private JCheckBox waitConnectCheckBox;
+    private JButton buttonSendParams;
     private UiListener uiListener;
-
-    boolean waitConnect = false;
 
     public ConnectDialog(UiListener uiListener) {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonConnect);
 
-        waitConnectCheckBox.addItemListener(e -> onWaitConnect(e.getStateChange() == ItemEvent.SELECTED));
-
         buttonConnect.addActionListener(e -> onConnect());
+        buttonSendParams.addActionListener(e -> onSendParams());
         buttonCancel.addActionListener(e -> onCancel());
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -58,6 +55,16 @@ public class ConnectDialog extends JDialog {
         setParity();
 
         this.uiListener = uiListener;
+    }
+
+    private void onSendParams() {
+        try {
+            uiListener.onWaitConnectButton(CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()));
+        } catch (NoSuchPortException e) {
+            e.printStackTrace();
+        }
+        uiListener.onDisconnectButton();
+        onConnect();
     }
 
     private void updateComPortList() {
@@ -104,45 +111,18 @@ public class ConnectDialog extends JDialog {
         parity.addItem(PARITY_SPACE);
     }
 
-    private void onWaitConnect(boolean selected) {
-        if (selected) {
-            baudRate.setEnabled(false);
-            dataBits.setEnabled(false);
-            stopBits.setEnabled(false);
-            parity.setEnabled(false);
-        } else {
-            baudRate.setEnabled(true);
-            dataBits.setEnabled(true);
-            stopBits.setEnabled(true);
-            parity.setEnabled(true);
-        }
-
-        waitConnect = selected;
-    }
-
     private void onConnect() {
-        if (waitConnect) {
-            try {
-                uiListener.onConnectButton(
-                        CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem())
-                );
-                dispose();
-            } catch (NoSuchPortException e) {
-                e.printStackTrace();
-            }
-        } else {
-            try {
-                uiListener.onConnectButton(
-                        CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()),
-                        (Integer) baudRate.getSelectedItem(),
-                        (Integer) dataBits.getSelectedItem(),
-                        getStopBits((String) stopBits.getSelectedItem()),
-                        getParity((String) parity.getSelectedItem())
-                );
-                dispose();
-            } catch (NoSuchPortException e) {
-                e.printStackTrace();
-            }
+        try {
+            uiListener.onConnectButton(
+                    CommPortIdentifier.getPortIdentifier((String) comPort.getSelectedItem()),
+                    (Integer) baudRate.getSelectedItem(),
+                    (Integer) dataBits.getSelectedItem(),
+                    getStopBits((String) stopBits.getSelectedItem()),
+                    getParity((String) parity.getSelectedItem())
+            );
+            dispose();
+        } catch (NoSuchPortException e) {
+            e.printStackTrace();
         }
     }
 
@@ -178,5 +158,9 @@ public class ConnectDialog extends JDialog {
             default:
                 return 0;
         }
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }

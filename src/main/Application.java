@@ -11,8 +11,6 @@ import network.SerialNetworkConnection;
 import ui.MainForm;
 import ui.UiListener;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.util.List;
 
@@ -22,6 +20,7 @@ import java.util.List;
 public class Application implements UiListener, FileTransferClientListener {
     private final MainForm mainForm;
     private FileTransferClient client;
+    private CommPortIdentifier waitingPort;
 
     public Application() {
         mainForm = new MainForm(this);
@@ -73,11 +72,12 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onError(String description) {
-        JOptionPane.showMessageDialog(new Frame(), description, "Error", JOptionPane.ERROR_MESSAGE);
+        mainForm.showAlert(description, true);
     }
 
     @Override
     public void onEndFileTransfer() {
+        mainForm.showAlert("Передача файла завершена", false);
         mainForm.clearProgress();
     }
 
@@ -94,7 +94,11 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onSetSerialPort(int baudRate, int dataBits, int stopBits, int parity) {
-        // TODO: 21.03.16
+        onDisconnectButton();
+        if (waitingPort != null) {
+            onConnectButton(waitingPort, baudRate, dataBits, stopBits, parity);
+        }
+        mainForm.closePortParamWaitingDialog();
     }
 
     @Override
@@ -110,11 +114,12 @@ public class Application implements UiListener, FileTransferClientListener {
     }
 
     @Override
-    public void onConnectButton(CommPortIdentifier port) {
+    public void onWaitConnectButton(CommPortIdentifier port) {
         try {
-            NetworkConnection connection = new SerialNetworkConnection(port, 3000, 50, 8, 1, 0);
+            NetworkConnection connection = new SerialNetworkConnection(port, 3000, 115200, 8, 1, 2);
             client = new FileTransferClient(connection, this);
             client.connect();
+            waitingPort = port;
         } catch (PortInUseException | UnsupportedCommOperationException e) {
             e.printStackTrace();
         }
