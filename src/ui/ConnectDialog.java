@@ -75,7 +75,7 @@ public class ConnectDialog extends JDialog {
         );
         uiListener.onDisconnectButton();
         onConnect();
-        dispose();
+        dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }
 
     private void updateComPortList() {

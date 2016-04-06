@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
@@ -134,7 +135,7 @@ public class MainForm {
 
     public void closePortParamWaitingDialog() {
         if (portParamWaitingDialog != null) {
-            portParamWaitingDialog.dispose();
+            portParamWaitingDialog.dispatchEvent(new WindowEvent(portParamWaitingDialog, WindowEvent.WINDOW_CLOSING));
         }
     }
 
