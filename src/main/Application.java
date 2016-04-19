@@ -34,6 +34,7 @@ public class Application implements UiListener, FileTransferClientListener {
     public void onDisconnectButton() {
         if (client != null) {
             client.disconnect();
+            client = null;
         }
     }
 
@@ -105,7 +106,10 @@ public class Application implements UiListener, FileTransferClientListener {
 
     @Override
     public void onConnectButton(CommPortIdentifier port, int baudRate, int dataBits, int stopBits, int parity) {
-        // TODO: send typeSetSpeed frame with parameters
+        if (client != null) {
+            return;
+        }
+
         try {
             NetworkConnection connection = new SerialNetworkConnection(port, 3000, baudRate, dataBits, stopBits, parity);
             client = new FileTransferClient(connection, this);
