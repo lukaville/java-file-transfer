@@ -33,7 +33,12 @@ public class Application implements UiListener, FileTransferClientListener {
     @Override
     public void onDisconnectButton() {
         if (client != null) {
-            client.disconnect();
+            try {
+                client.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                mainForm.showAlert("Ошибка при отключении", true);
+            }
             client = null;
         }
     }
