@@ -111,6 +111,7 @@ public class Application implements UiListener, FileTransferClientListener {
             client = new FileTransferClient(connection, this);
             client.connect();
         } catch (PortInUseException | UnsupportedCommOperationException e) {
+            mainForm.showAlert("Произошла ошибка при подключении", true);
             e.printStackTrace();
         }
     }
