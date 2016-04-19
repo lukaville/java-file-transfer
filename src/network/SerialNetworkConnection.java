@@ -25,6 +25,7 @@ public class SerialNetworkConnection extends NetworkConnection implements Serial
             port.addEventListener(this);
         } catch (TooManyListenersException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
