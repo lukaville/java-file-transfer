@@ -46,7 +46,31 @@ public class SerialNetworkConnection extends NetworkConnection implements Serial
 
     @Override
     public void close() {
-        port.close();
+        new Thread(){
+            @Override
+            public void run(){
+                try {
+                    port.getInputStream().close();
+                    port.getOutputStream().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("Waiting...");
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println("Removing listener...");
+                port.removeEventListener();
+
+                System.out.println("Closing serial port...");
+                port.close();
+            }
+        }.start();
     }
 
     @Override
@@ -55,8 +79,8 @@ public class SerialNetworkConnection extends NetworkConnection implements Serial
         System.out.println("RTS: " + port.isRTS());
         System.out.println("CTS: " + port.isCTS());
 
-//        if (port.isRTS() && port.isCTS()) {
-//            port.close();
-//        }
+        if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE && !event.getNewValue()) {
+            port.close();
+        }
     }
 }

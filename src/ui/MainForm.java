@@ -32,7 +32,6 @@ public class MainForm {
     private JButton getListButton;
     private JLabel statusLabel;
     private JProgressBar progressBar;
-    private JButton waitConnectButton;
     private final Application application;
 
     PortParamWaitingDialog portParamWaitingDialog;
@@ -64,7 +63,6 @@ public class MainForm {
         fileList.setModel(fileListModel);
 
         connectButton.addActionListener(e -> openConnectDialog());
-        waitConnectButton.addActionListener(e -> openPortParamWaitingDialog());
         disconnectButton.addActionListener(e -> application.onDisconnectButton());
         getListButton.addActionListener(e -> application.onGetListButton(pathTextField.getText()));
 

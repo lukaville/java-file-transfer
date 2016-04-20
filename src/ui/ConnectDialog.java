@@ -28,7 +28,6 @@ public class ConnectDialog extends JDialog {
     private JComboBox<String> stopBits;
     private JComboBox<String> parity;
     private JComboBox<String> comPort;
-    private JButton buttonSendParams;
     private Application application;
 
     public ConnectDialog(Application application) {
@@ -37,7 +36,6 @@ public class ConnectDialog extends JDialog {
         getRootPane().setDefaultButton(buttonConnect);
 
         buttonConnect.addActionListener(e -> onConnect());
-        buttonSendParams.addActionListener(e -> onSendParams());
         buttonCancel.addActionListener(e -> onCancel());
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -83,26 +81,26 @@ public class ConnectDialog extends JDialog {
     }
 
     private void setBaudRate() {
-        baudRate.addItem(50);
-        baudRate.addItem(75);
-        baudRate.addItem(150);
-        baudRate.addItem(300);
-        baudRate.addItem(600);
-        baudRate.addItem(1200);
-        baudRate.addItem(2400);
-        baudRate.addItem(4800);
-        baudRate.addItem(9600);
-        baudRate.addItem(19200);
-        baudRate.addItem(38400);
-        baudRate.addItem(57600);
         baudRate.addItem(115200);
+        baudRate.addItem(57600);
+        baudRate.addItem(38400);
+        baudRate.addItem(19200);
+        baudRate.addItem(9600);
+        baudRate.addItem(4800);
+        baudRate.addItem(2400);
+        baudRate.addItem(1200);
+        baudRate.addItem(600);
+        baudRate.addItem(300);
+        baudRate.addItem(150);
+        baudRate.addItem(75);
+        baudRate.addItem(50);
     }
 
     private void setDataBits() {
-        dataBits.addItem(SerialPort.DATABITS_5);
-        dataBits.addItem(SerialPort.DATABITS_6);
-        dataBits.addItem(SerialPort.DATABITS_7);
         dataBits.addItem(SerialPort.DATABITS_8);
+        dataBits.addItem(SerialPort.DATABITS_7);
+        dataBits.addItem(SerialPort.DATABITS_6);
+        dataBits.addItem(SerialPort.DATABITS_5);
     }
 
     private void setStopBits() {
@@ -112,11 +110,11 @@ public class ConnectDialog extends JDialog {
     }
 
     private void setParity() {
-        parity.addItem(PARITY_NONE);
         parity.addItem(PARITY_EVEN);
         parity.addItem(PARITY_ODD);
         parity.addItem(PARITY_MARK);
         parity.addItem(PARITY_SPACE);
+        parity.addItem(PARITY_NONE);
     }
 
     private void onConnect() {

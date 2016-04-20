@@ -118,8 +118,11 @@ public class DataLink extends Thread {
     }
 
     public void disconnect() {
+        System.out.println("Closing connection...");
         connection.close();
-        interrupt();
+        System.out.println("Connection closed.");
+        stop();
+        System.out.println("DataLink thread stopped.");
     }
 
     public void test() {

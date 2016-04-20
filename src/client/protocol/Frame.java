@@ -38,7 +38,7 @@ public class Frame {
             "file_data_retry",
             "file_data_cancel",
             "file_data_end",
-            "file_data_disconnect"
+            "disconnect"
     };
 
     private byte type = TYPE_CONNECT;

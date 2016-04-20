@@ -98,9 +98,13 @@ public class FileTransferClient implements FrameListener, ClientCallbacks {
     }
 
     public void disconnect() {
-        connectionHeartBeat.interrupt();
+        connectionHeartBeat.stop();
+        System.out.println("Heart beat interrupted");
         dataLink.disconnect();
-        onDisconnect();
+    }
+
+    public void sendDisconnect() {
+        dataLink.sendFrame(new Frame(Frame.TYPE_DISCONNECT));
     }
 
     public void requestFile(String remotePath, String localPath) {

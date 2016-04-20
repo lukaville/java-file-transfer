@@ -3,6 +3,7 @@ package main;
 import client.FileTransferClient;
 import client.FileTransferClientListener;
 import client.model.FileItem;
+import client.protocol.Frame;
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
 import gnu.io.UnsupportedCommOperationException;
@@ -33,12 +34,18 @@ public class Application implements UiListener, FileTransferClientListener {
     @Override
     public void onDisconnectButton() {
         if (client != null) {
+            client.sendDisconnect();
+
+            mainForm.setStatus(false);
+            mainForm.clear();
+
             try {
                 client.disconnect();
             } catch (Exception e) {
                 e.printStackTrace();
                 mainForm.showAlert("Ошибка при отключении", true);
             }
+
             client = null;
         }
     }
@@ -96,6 +103,8 @@ public class Application implements UiListener, FileTransferClientListener {
     public void onDisconnect() {
         mainForm.setStatus(false);
         mainForm.clear();
+        client.disconnect();
+        client = null;
     }
 
     @Override
