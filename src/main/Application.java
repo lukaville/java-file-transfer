@@ -6,6 +6,7 @@ import client.model.FileItem;
 import client.protocol.Frame;
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 import network.NetworkConnection;
 import network.SerialNetworkConnection;
@@ -125,7 +126,7 @@ public class Application implements UiListener, FileTransferClientListener {
         }
 
         try {
-            NetworkConnection connection = new SerialNetworkConnection(port, 3000, baudRate, dataBits, stopBits, parity);
+            NetworkConnection connection = new SerialNetworkConnection(port, 3000, baudRate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, parity);
             client = new FileTransferClient(connection, this);
             client.connect();
         } catch (PortInUseException | UnsupportedCommOperationException e) {

@@ -11,15 +11,16 @@ import java.util.TooManyListenersException;
  */
 public class SerialNetworkConnection extends NetworkConnection implements SerialPortEventListener {
     public static final String APP_NAME = "FileTransfer";
+    private boolean isConnectionEstabilished = false;
     private SerialPort port;
 
     public SerialNetworkConnection(CommPortIdentifier id, int timeout, int baudrate, int dataBits, int stopBits, int parity) throws PortInUseException, UnsupportedCommOperationException {
         port = (SerialPort) id.open(APP_NAME, timeout);
         port.setSerialPortParams(baudrate, dataBits, stopBits, parity);
 
-        port.notifyOnCTS(true);
-        port.notifyOnDataAvailable(true);
+        port.notifyOnBreakInterrupt(true);
         port.notifyOnDSR(true);
+        port.notifyOnCTS(true);
 
         try {
             port.addEventListener(this);
@@ -27,6 +28,8 @@ public class SerialNetworkConnection extends NetworkConnection implements Serial
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+
+        port.notifyOnDataAvailable(true);
     }
 
     @Override
@@ -76,11 +79,19 @@ public class SerialNetworkConnection extends NetworkConnection implements Serial
     @Override
     public void serialEvent(SerialPortEvent event) {
         System.out.println("Received event. Type: " + event.getEventType() + ", old value: " + event.getOldValue() + ", new value: " + event.getNewValue());
+        System.out.println("DTR: " + port.isDTR());
+        System.out.println("DSR: " + port.isDSR());
         System.out.println("RTS: " + port.isRTS());
         System.out.println("CTS: " + port.isCTS());
 
-        if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE && !event.getNewValue()) {
-            port.close();
+        if (port.isDTR() && port.isDSR()) {
+            if (!isConnectionEstabilished) {
+                isConnectionEstabilished = true;
+            }
+        } else {
+            if (isConnectionEstabilished) {
+                //close();
+            }
         }
     }
 }
